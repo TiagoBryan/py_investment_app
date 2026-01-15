@@ -1,0 +1,344 @@
+{% extends "global/base.html" %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 600px;">
+    <h1 class="page-title">Crie sua conta</h1>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {{ form.non_field_errors.as_text }}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'signup_page' %}" id="signupForm" novalidate>
+        {% csrf_token %}
+
+        <!-- Nome e Sobrenome -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="id_first_name" class="form-label">Nome</label>
+                <input type="text" name="first_name" id="id_first_name" class="form-input" placeholder="Seu nome" required>
+                <div class="form-error-msg" id="error_first_name">Campo obrigatório.</div>
+                {% if form.first_name.errors %}
+                <div class="form-error-msg" style="display:block; color: #dc3545;">
+                    {{ form.first_name.errors.0 }}
+                </div>
+            {% endif %}
+            </div>
+            
+
+            <div class="form-group">
+                <label for="id_last_name" class="form-label">Sobrenome</label>
+                <input type="text" name="last_name" id="id_last_name" class="form-input" placeholder="Seu sobrenome" required>
+                <div class="form-error-msg" id="error_last_name">Campo obrigatório.</div>
+                {% if form.last_name.errors %}
+                <div class="form-error-msg" style="display:block; color: #dc3545;">
+                    {{ form.last_name.errors.0 }}
+                </div>
+            {% endif %}
+            </div>
+
+            
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+            <label for="id_email" class="form-label">E-mail</label>
+            <input type="email" name="email" id="id_email" class="form-input" placeholder="seu@email.com" required>
+            <div class="form-error-msg" id="error_email">E-mail inválido.</div>
+            <!-- Erros vindos do Django -->
+            {% if form.email.errors %}
+                <div class="form-error-msg" style="display:block">{{ form.email.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Tipo de Pessoa -->
+        <div class="form-group">
+            <label class="form-label">Tipo de Pessoa</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" name="tipo_pessoa" value="F" checked>
+                    Pessoa Física (CPF)
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="tipo_pessoa" value="J">
+                    Pessoa Jurídica (CNPJ)
+                </label>
+            </div>
+
+            <input type="text" name="cpf_cnpj" id="id_cpf_cnpj" class="form-input" placeholder="000.000.000-00" maxlength="14" required>
+            <div class="form-error-msg" id="error_cpf_cnpj">Documento inválido.</div>
+            
+            {% if form.cpf_cnpj.errors %}
+                <div class="form-error-msg" style="display:block">{{ form.cpf_cnpj.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Senha -->
+        <div class="form-group">
+            <label for="id_password" class="form-label">Senha</label>
+            <div class="input-wrapper">
+                <input type="password" name="password" id="id_password" class="form-input" placeholder="Mínimo 8 caracteres" required>
+                <button type="button" class="password-toggle" data-target="id_password">
+                    <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                </button>
+            </div>
+            <!-- Lista de ajuda visual -->
+            <ul class="password-requirements">
+                <li id="req-length">• Mínimo 8 caracteres</li>
+            </ul>
+            
+            <!-- Erros do Django (ex: senha muito comum) -->
+            {% if form.password.errors %}
+                <div class="form-error-msg" style="display:block">
+                    {% for error in form.password.errors %}
+                        {{ error }}<br>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Confirmação de Senha -->
+        <div class="form-group">
+            <label for="id_password_confirm" class="form-label">Confirme sua senha</label>
+            <div class="input-wrapper">
+                <input type="password" name="confirm_password" id="id_password_confirm" class="form-input" placeholder="Repita a senha" required>
+                <button type="button" class="password-toggle" data-target="id_password_confirm">
+                    <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                </button>
+            </div>
+            <div class="form-error-msg" id="error_password_match">As senhas não coincidem.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Criar Conta</button>
+
+        <div class="form-footer">
+            <a href="{% url 'login_page' %}">Já tem uma conta? Entrar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- FUNÇÕES UTILITÁRIAS DE VALIDAÇÃO ---
+        
+        // Algoritmo de validação de CPF
+        function validaCPF(cpf) {
+            cpf = cpf.replace(/[^\d]+/g,'');
+            if(cpf == '') return false;
+            // Elimina CPFs invalidos conhecidos
+            if (cpf.length != 11 || 
+                cpf == "00000000000" || 
+                cpf == "11111111111" || 
+                cpf == "22222222222" || 
+                cpf == "33333333333" || 
+                cpf == "44444444444" || 
+                cpf == "55555555555" || 
+                cpf == "66666666666" || 
+                cpf == "77777777777" || 
+                cpf == "88888888888" || 
+                cpf == "99999999999")
+                    return false;
+            
+            let add = 0;
+            for (let i=0; i < 9; i ++) add += parseInt(cpf.charAt(i)) * (10 - i);
+            let rev = 11 - (add % 11);
+            if (rev == 10 || rev == 11) rev = 0;
+            if (rev != parseInt(cpf.charAt(9))) return false;
+            
+            add = 0;
+            for (let i = 0; i < 10; i ++) add += parseInt(cpf.charAt(i)) * (11 - i);
+            rev = 11 - (add % 11);
+            if (rev == 10 || rev == 11) rev = 0;
+            if (rev != parseInt(cpf.charAt(10))) return false;
+            
+            return true;
+        }
+
+        // Algoritmo de validação de CNPJ
+        function validaCNPJ(cnpj) {
+            cnpj = cnpj.replace(/[^\d]+/g,'');
+            if(cnpj == '') return false;
+            if (cnpj.length != 14) return false;
+            if (/^(\d)\1+$/.test(cnpj)) return false; // Elimina todos iguais
+
+            // Valida DVs
+            let tamanho = cnpj.length - 2
+            let numeros = cnpj.substring(0,tamanho);
+            let digitos = cnpj.substring(tamanho);
+            let soma = 0;
+            let pos = tamanho - 7;
+            for (let i = tamanho; i >= 1; i--) {
+                soma += numeros.charAt(tamanho - i) * pos--;
+                if (pos < 2) pos = 9;
+            }
+            let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+            if (resultado != digitos.charAt(0)) return false;
+
+            tamanho = tamanho + 1;
+            numeros = cnpj.substring(0,tamanho);
+            soma = 0;
+            pos = tamanho - 7;
+            for (let i = tamanho; i >= 1; i--) {
+                soma += numeros.charAt(tamanho - i) * pos--;
+                if (pos < 2) pos = 9;
+            }
+            resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+            if (resultado != digitos.charAt(1)) return false;
+
+            return true;
+        }
+
+        // --- LÓGICA DE INTERFACE ---
+
+        const form = document.getElementById('signupForm');
+        
+        // 1. Alternar visualização de senha
+        const toggleButtons = document.querySelectorAll('.password-toggle');
+        toggleButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const icon = this.querySelector('.eye-icon');
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                if (type === 'text') {
+                    icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+                } else {
+                    icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+                }
+            });
+        });
+
+        // 2. Máscaras e configurações de CPF/CNPJ
+        const docRadios = document.querySelectorAll('input[name="tipo_pessoa"]');
+        const docInput = document.getElementById('id_cpf_cnpj');
+        
+        function updateMaskSettings() {
+            const type = document.querySelector('input[name="tipo_pessoa"]:checked').value;
+            // Remove estados de erro/sucesso ao trocar
+            docInput.classList.remove('input-error', 'input-success');
+            document.getElementById('error_cpf_cnpj').style.display = 'none';
+            docInput.value = ''; 
+
+            if (type === 'F') {
+                docInput.placeholder = '000.000.000-00';
+                docInput.maxLength = 14;
+            } else {
+                docInput.placeholder = '00.000.000/0000-00';
+                docInput.maxLength = 18;
+            }
+        }
+        docRadios.forEach(r => r.addEventListener('change', updateMaskSettings));
+
+        docInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            const type = document.querySelector('input[name="tipo_pessoa"]:checked').value;
+
+            if (type === 'F') {
+                if (value.length > 11) value = value.slice(0, 11);
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            } else {
+                if (value.length > 14) value = value.slice(0, 14);
+                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            }
+            e.target.value = value;
+            
+            // Validação em "quase" tempo real (quando atinge tamanho)
+            const cleanVal = e.target.value.replace(/\D/g, '');
+            const expectedLen = type === 'F' ? 11 : 14;
+            
+            if (cleanVal.length === expectedLen) {
+                const isValid = type === 'F' ? validaCPF(e.target.value) : validaCNPJ(e.target.value);
+                if (isValid) {
+                    docInput.classList.remove('input-error');
+                    docInput.classList.add('input-success');
+                    document.getElementById('error_cpf_cnpj').style.display = 'none';
+                } else {
+                    docInput.classList.remove('input-success');
+                    docInput.classList.add('input-error');
+                    const msg = document.getElementById('error_cpf_cnpj');
+                    msg.innerText = "Dígito verificador inválido.";
+                    msg.style.display = 'block';
+                }
+            } else {
+                docInput.classList.remove('input-success', 'input-error');
+                document.getElementById('error_cpf_cnpj').style.display = 'none';
+            }
+        });
+
+        // 3. Verificação de Senha em Tempo Real
+        const pass1 = document.getElementById('id_password');
+        const pass2 = document.getElementById('id_password_confirm');
+        const errorMatch = document.getElementById('error_password_match');
+        const reqLength = document.getElementById('req-length');
+
+        function checkPasswords() {
+            const val1 = pass1.value;
+            const val2 = pass2.value;
+
+            // Checar tamanho (UX básico para o Django Validator)
+            if (val1.length >= 8) {
+                reqLength.classList.add('valid');
+                reqLength.classList.remove('invalid');
+            } else {
+                reqLength.classList.remove('valid');
+                if(val1.length > 0) reqLength.classList.add('invalid');
+            }
+
+            // Checar igualdade (apenas se começou a digitar a confirmação)
+            if (val2.length > 0) {
+                if (val1 !== val2) {
+                    pass2.classList.add('input-error');
+                    pass2.classList.remove('input-success');
+                    errorMatch.style.display = 'block';
+                } else {
+                    pass2.classList.remove('input-error');
+                    pass2.classList.add('input-success');
+                    errorMatch.style.display = 'none';
+                }
+            } else {
+                pass2.classList.remove('input-error', 'input-success');
+                errorMatch.style.display = 'none';
+            }
+        }
+
+        pass1.addEventListener('input', checkPasswords);
+        pass2.addEventListener('input', checkPasswords);
+
+        // 4. Submit Final (Prevenção de segurança)
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            const docType = document.querySelector('input[name="tipo_pessoa"]:checked').value;
+            const docVal = docInput.value;
+            
+            // Validar Doc Mathematicamente
+            const isDocValid = docType === 'F' ? validaCPF(docVal) : validaCNPJ(docVal);
+            if (!isDocValid) {
+                docInput.classList.add('input-error');
+                const msg = document.getElementById('error_cpf_cnpj');
+                msg.innerText = "Documento inválido.";
+                msg.style.display = 'block';
+                isValid = false;
+            }
+
+            // Validar Senhas Match
+            if (pass1.value !== pass2.value) {
+                pass2.classList.add('input-error');
+                errorMatch.style.display = 'block';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                // Scroll para o topo ou para o primeiro erro poderia ser adicionado aqui
+            }
+        });
+    });
+</script>
+{% endblock content %}

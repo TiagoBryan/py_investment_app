@@ -1,0 +1,111 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="auth-container">
+    <div class="text-center">
+        <!-- Ícone Saque (Amarelo) -->
+        <svg class="status-icon" style="color: #f59e0b;" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
+
+        <h1 class="page-title">Realizar Saque</h1>
+        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+            Retirada de valores da conta corrente.
+        </p>
+    </div>
+
+    <!-- Bloco de Saldo Disponível -->
+    <div class="balance-info-card">
+        <div style="display: flex; align-items: center;">
+            <span class="balance-label">Disponível: </span>
+            
+            <!-- Valor Oculto (Padrão) -->
+            <span id="saldo-hidden" class="balance-value" style="letter-spacing: 2px;">••••••</span>
+            
+            <!-- Valor Visível (Inicia escondido) -->
+            <span id="saldo-visible" class="balance-label" style="display: none;">
+                R$ {{ saldo|floatformat:2 }}
+            </span>
+        </div>
+
+        <button type="button" class="balance-toggle-btn" id="toggleSaldo" title="Mostrar/Ocultar Saldo">
+            <!-- Ícone Olho Fechado (Inicia fechado) -->
+            <svg id="eye-icon-saldo" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+        </button>
+    </div>
+
+    <form method="post" id="saqueForm" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors.as_text }}
+            </div>
+        {% endif %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                
+                {% if 'password' in field.name %}
+                    <div class="input-wrapper">
+                         <input type="password" name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-input" required>
+                    </div>
+                {% else %}
+                    <div class="currency-wrapper">
+                        <span class="currency-symbol">R$</span>
+                        <input type="number" step="0.01" name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-input" placeholder="0,00" required>
+                    </div>
+                {% endif %}
+
+                {% if field.errors %}
+                    <div class="form-error-msg" style="display:block">{{ field.errors.0 }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary" style="background-color: #f59e0b; border-color: #f59e0b;">
+            Confirmar Saque
+        </button>
+
+        <div class="form-footer">
+            <a href="{% url 'home_page' %}">Voltar a tela inicial</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('toggleSaldo');
+        const hiddenSpan = document.getElementById('saldo-hidden');
+        const visibleSpan = document.getElementById('saldo-visible');
+        const eyeIcon = document.getElementById('eye-icon-saldo');
+
+        let isVisible = false;
+
+        toggleBtn.addEventListener('click', function() {
+            isVisible = !isVisible;
+
+            if (isVisible) {
+                // Mostrar Saldo
+                hiddenSpan.style.display = 'none';
+                visibleSpan.style.display = 'inline';
+                // Ícone Olho Aberto
+                eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+            } else {
+                // Ocultar Saldo
+                hiddenSpan.style.display = 'inline';
+                visibleSpan.style.display = 'none';
+                // Ícone Olho Fechado
+                eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+            }
+        });
+    });
+</script>
+{% endblock content %}

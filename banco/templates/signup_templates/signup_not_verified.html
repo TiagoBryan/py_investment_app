@@ -1,0 +1,22 @@
+{% extends "global/base.html" %}
+
+{% block content %}
+<div class="auth-container text-center">
+    <!-- Ícone de Erro/Alerta -->
+    <svg class="status-icon error" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+
+    <h1 class="page-title">Não foi possível verificar</h1>
+    
+    <p class="status-message">
+        O link de verificação expirou ou é inválido. Por favor, realize o cadastro novamente.
+    </p>
+
+    <a href="{% url 'signup_page' %}" class="btn btn-primary">
+        Cadastrar Novamente
+    </a>
+</div>
+{% endblock content %} 

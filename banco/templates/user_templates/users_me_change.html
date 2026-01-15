@@ -1,0 +1,114 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="auth-container">
+    <div class="text-center">
+        <h1 class="page-title">Editar Perfil</h1>
+        <p style="color: var(--text-light); margin-bottom: 2rem;">
+            Atualize suas informações de identificação pessoal.
+        </p>
+    </div>
+
+    <form method="post" action="{% url 'users_me_change_page' %}" id="profileForm" novalidate>
+        {% csrf_token %}
+
+        <!-- Erros do Django -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors.as_text }}
+            </div>
+        {% endif %}
+
+        <!-- Grid de Nome e Sobrenome -->
+        <div class="form-row">
+            <!-- Primeiro Nome -->
+            <div class="form-group">
+                <label for="id_first_name" class="form-label">Nome</label>
+                <input 
+                    type="text" 
+                    name="first_name" 
+                    id="id_first_name" 
+                    class="form-input" 
+                    value="{{ form.first_name.value|default:first_name|default:'' }}" 
+                    required
+                >
+                <div class="form-error-msg" id="error_first_name">O nome é obrigatório.</div>
+                
+                {% if form.first_name.errors %}
+                    <div class="form-error-msg" style="display:block">{{ form.first_name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Sobrenome -->
+            <div class="form-group">
+                <label for="id_last_name" class="form-label">Sobrenome</label>
+                <input 
+                    type="text" 
+                    name="last_name" 
+                    id="id_last_name" 
+                    class="form-input" 
+                    value="{{ form.last_name.value|default:last_name|default:'' }}" 
+                    required
+                >
+                <div class="form-error-msg" id="error_last_name">O sobrenome é obrigatório.</div>
+                
+                {% if form.last_name.errors %}
+                    <div class="form-error-msg" style="display:block">{{ form.last_name.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        
+        <div class="form-footer">
+            <a href="{% url 'home_page' %}">Cancelar e voltar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('profileForm');
+        
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Função auxiliar de validação
+            const validateField = (id, errorId) => {
+                const input = document.getElementById(id);
+                const errorDiv = document.getElementById(errorId);
+                
+                if (input.value.trim() === '') {
+                    input.style.borderColor = 'var(--error-color)';
+                    errorDiv.style.display = 'block';
+                    return false;
+                } else {
+                    input.style.borderColor = 'var(--border-color)';
+                    errorDiv.style.display = 'none';
+                    return true;
+                }
+            };
+
+            // Validar os dois campos
+            const validName = validateField('id_first_name', 'error_first_name');
+            const validLast = validateField('id_last_name', 'error_last_name');
+
+            if (!validName || !validLast) {
+                e.preventDefault();
+            }
+        });
+
+        // Limpar erro ao digitar
+        ['id_first_name', 'id_last_name'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function() {
+                this.style.borderColor = 'var(--border-color)';
+                // Oculta a msg de erro associada (logica simples baseada no ID)
+                const errorId = id === 'id_first_name' ? 'error_first_name' : 'error_last_name';
+                document.getElementById(errorId).style.display = 'none';
+            });
+        });
+    });
+</script>
+{% endblock content %}

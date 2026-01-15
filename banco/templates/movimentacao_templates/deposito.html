@@ -1,0 +1,82 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="auth-container">
+    <div class="text-center">
+        <!-- Ícone Depósito (Seta para baixo/Entrada) -->
+        <svg class="status-icon success" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
+        </svg>
+
+        <h1 class="page-title">Realizar Depósito</h1>
+        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+            Adicione fundos à sua conta corrente.
+        </p>
+    </div>
+
+    <form method="post" id="depositoForm" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors.as_text }}
+            </div>
+        {% endif %}
+
+        <!-- Loop inteligente para renderizar os campos do form com nosso estilo -->
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                
+                <div class="currency-wrapper">
+                    <span class="currency-symbol">R$</span>
+                    <input 
+                        type="number" 
+                        step="0.01" 
+                        name="{{ field.name }}" 
+                        id="{{ field.id_for_label }}" 
+                        class="form-input" 
+                        placeholder="0,00"
+                        required
+                    >
+                </div>
+
+                {% if field.errors %}
+                    <div class="form-error-msg" style="display:block">{{ field.errors.0 }}</div>
+                {% endif %}
+                <div class="form-error-msg" id="error_{{ field.name }}" style="display:none;">Valor inválido.</div>
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary" style="background-color: var(--success-color);">
+            Confirmar Depósito
+        </button>
+
+        <div class="form-footer">
+            <a href="{% url 'home_page' %}">Voltar a tela inicial</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Validação Front-end para impedir valores negativos
+    document.getElementById('depositoForm').addEventListener('submit', function(e) {
+        const inputs = this.querySelectorAll('input[type="number"]');
+        let isValid = true;
+
+        inputs.forEach(input => {
+            if (input.value <= 0 || input.value === '') {
+                input.style.borderColor = 'var(--error-color)';
+                isValid = false;
+            } else {
+                input.style.borderColor = 'var(--border-color)';
+            }
+        });
+
+        if (!isValid) e.preventDefault();
+    });
+</script>
+{% endblock content %}

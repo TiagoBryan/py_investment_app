@@ -1,0 +1,69 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="auth-container">
+    <div class="text-center">
+        <!-- Ícone de Perigo (User X) -->
+        <svg class="status-icon error" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--error-color);"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="18" y1="8" x2="23" y2="13"></line><line x1="23" y1="8" x2="18" y2="13"></line></svg>
+        
+        <h1 class="page-title">Excluir Meu Acesso</h1>
+        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+            Você está prestes a desativar seu usuário de acesso ao JaverBank.
+        </p>
+    </div>
+
+    <!-- Aviso de Impacto -->
+    <div class="alert alert-error">
+        <strong>Atenção:</strong> Ao confirmar esta ação:
+        <ul style="margin-top: 5px; margin-left: 20px; list-style-type: disc;">
+            <li>Seu login será bloqueado permanentemente.</li>
+            <li>Sua conta corrente (se ativa) será encerrada automaticamente.</li>
+            <li>Você será desconectado de todos os dispositivos.</li>
+        </ul>
+    </div>
+
+    <form method="post" action="{% url 'user_deactivate_page' %}" novalidate>
+        {% csrf_token %}
+
+        <!-- Erros gerais (ex: Saldo não zerado retornado pela API) -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors.as_text }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="password" class="form-label">Confirme sua senha para continuar</label>
+            <div class="input-wrapper">
+                <input type="password" name="password" id="password" class="form-input" placeholder="Sua senha atual" required>
+                <button type="button" class="password-toggle" id="togglePass">
+                    <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                </button>
+            </div>
+            {% if form.password.errors %}
+                 <div class="form-error-msg" style="display:block">{{ form.password.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-danger">Excluir Tudo</button>
+        <a href="{% url 'home_page' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+
+    <script>
+        document.getElementById('togglePass').addEventListener('click', function() {
+            const input = document.getElementById('password');
+            const icon = this.querySelector('.eye-icon');
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            
+            if (type === 'text') {
+                icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+            } else {
+                icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+            }
+        });
+    </script>
+</div>
+{% endblock content %}

@@ -1,0 +1,69 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="auth-container">
+    <div class="text-center">
+        <h1 class="page-title">Alterar E-mail</h1>
+        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+            Informe o novo endereço de e-mail que deseja associar à sua conta.
+        </p>
+    </div>
+
+    <form method="post" action="{% url 'email_change_page' %}" id="emailChangeForm" novalidate>
+        {% csrf_token %}
+
+        <!-- Exibição de erros do Django -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors.as_text }}
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_email" class="form-label">Novo E-mail</label>
+            <input type="email" name="email" id="id_email" class="form-input" placeholder="novo@email.com" required>
+            <div class="form-error-msg" id="error_email">Por favor, insira um e-mail válido.</div>
+            
+            {% if form.email.errors %}
+                <div class="form-error-msg" style="display:block">
+                    {{ form.email.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enviar Link de Confirmação</button>
+        
+        <div class="form-footer">
+            <a href="{% url 'home_page' %}">Cancelar e voltar</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('emailChangeForm');
+        const emailInput = document.getElementById('id_email');
+        const errorMsg = document.getElementById('error_email');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        form.addEventListener('submit', function(e) {
+            if (!emailRegex.test(emailInput.value)) {
+                e.preventDefault();
+                emailInput.style.borderColor = 'var(--error-color)';
+                errorMsg.style.display = 'block';
+            } else {
+                emailInput.style.borderColor = 'var(--border-color)';
+                errorMsg.style.display = 'none';
+            }
+        });
+
+        // Limpar erro ao digitar
+        emailInput.addEventListener('input', function() {
+            emailInput.style.borderColor = 'var(--border-color)';
+            errorMsg.style.display = 'none';
+        });
+    });
+</script>
+{% endblock content %}

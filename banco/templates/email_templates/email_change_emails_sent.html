@@ -1,0 +1,24 @@
+{% extends "global/base.html" %}
+{% block content %}
+<div class="auth-container text-center">
+    <!-- Ícone de Envelope/Info -->
+    <svg class="status-icon info" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+        <polyline points="22,6 12,13 2,6"></polyline>
+    </svg>
+
+    <h1 class="page-title">Verifique sua Caixa de Entrada</h1>
+    
+    <div class="status-message">
+        <p>Enviamos as instruções de confirmação.</p>
+        <ul style="text-align: left; margin-top: 1rem; font-size: 0.95rem; color: var(--text-main);">
+            <li style="margin-bottom: 0.5rem;">Um aviso de segurança foi enviado ao seu <strong>e-mail antigo</strong>.</li>
+            <li>O link de ativação foi enviado para o seu <strong>novo e-mail</strong>. Clique nele para confirmar a troca.</li>
+        </ul>
+    </div>
+
+    <a href="{% url 'home_page' %}" class="btn btn-outline" style="width: auto; padding-left: 2rem; padding-right: 2rem;">
+        Voltar para a tela inicial
+    </a>
+</div>
+{% endblock content %}

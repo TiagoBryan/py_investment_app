@@ -1,0 +1,72 @@
+{% extends "global/base.html" %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 800px;"> <!-- Container um pouco menor para focar -->
+    
+    <div class="text-center" style="margin-bottom: 2rem;">
+        <h1 class="page-title" style="margin-bottom: 0.5rem;">Análise de Crédito</h1>
+        <p style="color: var(--text-light);">Visualize sua saúde financeira atual.</p>
+    </div>
+
+    <div class="stats-grid">
+        
+        <!-- Cartão de Saldo -->
+        <div class="stat-card">
+            <div class="stat-label">Saldo em Conta</div>
+            <div class="stat-value">
+                <small style="font-size: 1.5rem; color: var(--text-light);">R$</small> 
+                {{ saldo|floatformat:2 }}
+            </div>
+            
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center;">
+                <a href="{% url 'deposito_page' %}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Depositar</a>
+                <a href="{% url 'saque_page' %}" class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Sacar</a>
+            </div>
+        </div>
+
+        <!-- Cartão de Score -->
+        <div class="stat-card">
+            <div class="stat-label">Meu Score</div>
+            <!-- ID para o JS colorir -->
+            <div class="stat-value" id="scoreValue">
+                {{ score|floatformat:2 }}
+            </div>
+            
+            <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-light);" id="scoreText">
+                Calculando status...
+            </div>
+        </div>
+
+    </div>
+
+    <div class="text-center" style="margin-top: 3rem;">
+        <a href="{% url 'home_page' %}" style="color: var(--text-light); text-decoration: underline;">Voltar para a tela inicial</a>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lógica para colorir o Score
+        const scoreElement = document.getElementById('scoreValue');
+        const textElement = document.getElementById('scoreText');
+        
+        // Converte o texto do django template em número (remove pontos se houver)
+        const score = parseInt(scoreElement.innerText.replace(/\D/g, '')) || 0;
+
+        if (score >= 700) {
+            scoreElement.classList.add('score-high');
+            textElement.innerText = "Excelente! Você tem alto potencial de crédito.";
+            textElement.style.color = "var(--success-color)";
+        } else if (score >= 400) {
+            scoreElement.classList.add('score-med');
+            textElement.innerText = "Bom. Mantenha suas contas em dia para subir.";
+            textElement.style.color = "#f59e0b";
+        } else {
+            scoreElement.classList.add('score-low');
+            textElement.innerText = "Atenção. Evite dívidas.";
+            textElement.style.color = "var(--error-color)";
+        }
+    });
+</script>
+{% endblock content %}

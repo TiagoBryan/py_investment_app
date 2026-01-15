@@ -1,0 +1,176 @@
+{% extends "global/base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <h1 class="page-title">Acesse sua conta</h1>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-error">
+            {{ form.non_field_errors.as_text }}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login_page' %}" id="loginForm" novalidate>
+        {% csrf_token %}
+
+        <!-- Campo Email -->
+        <div class="form-group">
+            <label for="id_email" class="form-label">E-mail</label>
+            <input type="email" name="email" id="id_email" class="form-input" placeholder="seu@email.com" required>
+            <div class="form-error-msg" id="error_email">E-mail inválido.</div>
+        </div>
+
+        <!-- Campo CPF/CNPJ com Seletor -->
+        <div class="form-group">
+            <label class="form-label">Tipo de Documento</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" name="doc_type" value="cpf" checked>
+                    Pessoa Física (CPF)
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="doc_type" value="cnpj">
+                    Empresa (CNPJ)
+                </label>
+            </div>
+
+            <input type="text" name="cpf_cnpj" id="id_cpf_cnpj" class="form-input" placeholder="000.000.000-00" maxlength="14" required>
+            <div class="form-error-msg" id="error_cpf_cnpj">Documento inválido.</div>
+            
+            {% if form.cpf_cnpj.errors %}
+                <div class="form-error-msg" style="display:block">{{ form.cpf_cnpj.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Campo Senha com Toggle -->
+        <div class="form-group">
+            <label for="id_password" class="form-label">Senha</label>
+            <div class="input-wrapper">
+                <input type="password" name="password" id="id_password" class="form-input" placeholder="••••••••" required>
+                
+                <button type="button" class="password-toggle" id="togglePassword" title="Mostrar senha">
+                    <!-- Ícone Olho Fechado (Padrão) -->
+                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="form-error-msg" id="error_password">A senha é obrigatória.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Entrar</button>
+
+        <div class="form-footer">
+            <a href="{% url 'password_reset_page' %}">Esqueceu sua senha?</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elementos
+        const docRadios = document.querySelectorAll('input[name="doc_type"]');
+        const docInput = document.getElementById('id_cpf_cnpj');
+        const passInput = document.getElementById('id_password');
+        const toggleBtn = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eye-icon');
+
+        // --- 1. Lógica do Toggle de Senha ---
+        toggleBtn.addEventListener('click', function() {
+            const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passInput.setAttribute('type', type);
+            
+            // Troca o ícone SVG dinamicamente
+            if (type === 'text') {
+                // Olho Aberto
+                eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+            } else {
+                // Olho Cortado (Fechado)
+                eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+            }
+        });
+
+        // --- 2. Lógica de Seleção CPF/CNPJ ---
+        function updateMaskSettings() {
+            const type = document.querySelector('input[name="doc_type"]:checked').value;
+            
+            // Limpa o campo se mudar o tipo para evitar confusão de máscara
+            // (Opcional: você pode tentar converter o valor se quiser)
+            docInput.value = ''; 
+            docInput.style.borderColor = 'var(--border-color)';
+            document.getElementById('error_cpf_cnpj').style.display = 'none';
+
+            if (type === 'cpf') {
+                docInput.setAttribute('placeholder', '000.000.000-00');
+                docInput.setAttribute('maxlength', '14');
+            } else {
+                docInput.setAttribute('placeholder', '00.000.000/0000-00');
+                docInput.setAttribute('maxlength', '18');
+            }
+        }
+
+        // Escuta a mudança nos radios
+        docRadios.forEach(radio => radio.addEventListener('change', updateMaskSettings));
+
+        // --- 3. Aplicação da Máscara ---
+        docInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove letras
+            const type = document.querySelector('input[name="doc_type"]:checked').value;
+
+            if (type === 'cpf') {
+                if (value.length > 11) value = value.slice(0, 11);
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            } else {
+                if (value.length > 14) value = value.slice(0, 14);
+                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            }
+            
+            e.target.value = value;
+        });
+
+        // --- 4. Validação no Submit ---
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            let isValid = true;
+            const type = document.querySelector('input[name="doc_type"]:checked').value;
+            const docValue = docInput.value.replace(/\D/g, ''); // Apenas números
+
+            // Validação de tamanho mínimo
+            const minLength = (type === 'cpf') ? 11 : 14;
+            
+            if (docValue.length < minLength) {
+                docInput.style.borderColor = 'var(--error-color)';
+                const msg = document.getElementById('error_cpf_cnpj');
+                msg.innerText = type === 'cpf' ? 'CPF incompleto' : 'CNPJ incompleto';
+                msg.style.display = 'block';
+                isValid = false;
+            } else {
+                docInput.style.borderColor = 'var(--border-color)';
+                document.getElementById('error_cpf_cnpj').style.display = 'none';
+            }
+
+            // Validação simples de email e senha (mantendo a lógica anterior)
+            const emailField = document.getElementById('id_email');
+            if(!emailField.value.includes('@')) {
+                emailField.style.borderColor = 'var(--error-color)';
+                document.getElementById('error_email').style.display = 'block';
+                isValid = false;
+            }
+
+            const passField = document.getElementById('id_password');
+            if(passField.value.trim() === '') {
+                passField.style.borderColor = 'var(--error-color)';
+                document.getElementById('error_password').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!isValid) e.preventDefault();
+        });
+    });
+</script>
+{% endblock content %}

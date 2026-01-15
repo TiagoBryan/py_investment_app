@@ -1,0 +1,67 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="auth-container">
+    <div class="text-center">
+        <svg class="status-icon info" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></svg>
+        <h1 class="page-title">Nova Conta Corrente</h1>
+    </div>
+
+    <div class="alert" style="background-color: #eff6ff; color: #1e40af; border: 1px solid #dbeafe;">
+        <small><strong>Nota:</strong> A conta será vinculada ao seu CPF/CNPJ. Cada cliente pode ter apenas uma conta ativa.</small>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors.as_text }}
+            </div>
+        {% endif %}
+
+        <!-- Agência -->
+        <div class="form-group">
+            <label for="{{ form.agencia.id_for_label }}" class="form-label">Agência</label>
+            <!-- Renderização manual para aplicar classe CSS -->
+            <input type="text" 
+                   name="{{ form.agencia.name }}" 
+                   id="{{ form.agencia.id_for_label }}" 
+                   class="form-input" 
+                   value="{{ form.agencia.value|default:'' }}"
+                   placeholder="Ex: 0001"
+                   inputmode="numeric"
+                   pattern="[0-9]*">
+            
+            {% if form.agencia.errors %}
+                <div class="form-error-msg" style="display:block">{{ form.agencia.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Número da Conta -->
+        <div class="form-group">
+            <label for="{{ form.numero.id_for_label }}" class="form-label">Número da Conta</label>
+            <input type="text" 
+                   name="{{ form.numero.name }}" 
+                   id="{{ form.numero.id_for_label }}" 
+                   class="form-input" 
+                   value="{{ form.numero.value|default:'' }}"
+                   placeholder="Ex: 123456"
+                   inputmode="numeric"
+                   pattern="[0-9]*">
+                   
+            {% if form.numero.errors %}
+                <div class="form-error-msg" style="display:block">{{ form.numero.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Criar Conta</button>
+        
+        <div class="form-footer">
+            <a href="{% url 'home_page' %}">Cancelar e voltar</a>
+        </div>
+    </form>
+</div>
+{% endblock content %}

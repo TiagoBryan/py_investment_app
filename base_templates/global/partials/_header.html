@@ -1,0 +1,20 @@
+<header class="main-header">
+    <a href="/" class="brand-logo">
+        <!-- Ícone SVG de Banco -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        JaverBank
+    </a>
+
+    {% if user.is_authenticated or first_name %}
+    <div class="header-user-actions">
+        <span class="user-greeting">
+            Olá, <strong>{{ first_name|default:user.first_name }}</strong>
+        </span>
+        
+        <!-- Form de Logout (Seguro via POST) -->
+        <form method="get" action="{% url 'logout_page' %}" style="display:inline;">
+            <button type="submit" class="btn-logout">Sair</button>
+        </form>
+    </div>
+    {% endif %}
+</header>
