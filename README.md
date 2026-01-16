@@ -1,4 +1,3 @@
-```markdown
 # JaverBank Web Client (Frontend) 💻
 
 Aplicação Web desenvolvida em **Django** que atua como interface para o JaverBank API. Este projeto não possui banco de dados de negócio local; ele consome todos os dados e regras via requisições HTTP para a API Backend.
@@ -86,4 +85,3 @@ O Frontend segue o padrão de **Consumer**:
 5. **View** trata a resposta e exibe mensagens de sucesso ou erros de validação no template.
 
 ---
-```
