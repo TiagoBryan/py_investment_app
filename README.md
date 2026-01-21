@@ -1,6 +1,6 @@
-# JaverBank Web Client (Frontend) 💻
+# PYInvest Web Client (Frontend) 💻
 
-Aplicação Web desenvolvida em **Django** que atua como interface para o JaverBank API. Este projeto não possui banco de dados de negócio local; ele consome todos os dados e regras via requisições HTTP para a API Backend.
+Aplicação Web desenvolvida em **Django** que atua como interface para o PYInvest API. Este projeto não possui banco de dados de negócio local; ele consome todos os dados e regras via requisições HTTP para a API Backend.
 
 ## 🚀 Funcionalidades
 
@@ -15,7 +15,7 @@ Aplicação Web desenvolvida em **Django** que atua como interface para o JaverB
 
 ## ⚠️ Pré-requisitos
 
-Para que este projeto funcione, a **JaverBank API** deve estar rodando.
+Para que este projeto funcione, a **PYInvest API** deve estar rodando.
 Certifique-se de baixar e rodar o repositório da API na porta `8000` (ou configurar a URL correta).
 
 ## 🛠️ Tecnologias

@@ -9,3 +9,4 @@ from .movimentacao_front_end import *
 from .password_front_end import *
 from .signup_front_end import *
 from .user_front_end import *
+from .investimentos_front_end import *

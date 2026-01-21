@@ -6,3 +6,4 @@ from .movimentacao_form import *
 from .password_form import *
 from .signup_form import *
 from .user_form import *
+from .investimento_form import *

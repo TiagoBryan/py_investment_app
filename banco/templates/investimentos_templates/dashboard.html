@@ -1,0 +1,128 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- Cabeçalho Simples -->
+    <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 class="page-title" style="margin-bottom: 0.2rem; text-align: left;">PY Invest</h1>
+            <p style="color: var(--text-light);">Área do Investidor</p>
+        </div>
+        <a href="{% url 'home_page' %}" class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Voltar</a>
+    </div>
+
+    {% if error %}
+        <!-- Tratamento de Erro da API -->
+        <div class="alert alert-error">
+            <strong>Indisponível:</strong> {{ error }}
+        </div>
+    {% else %}
+        
+        {% if investidor %}
+            <!-- CENÁRIO 1: USUÁRIO JÁ POSSUI PERFIL DE INVESTIDOR -->
+            
+            <!-- Hero Card: Resumo Patrimonial e Projeção -->
+            <div class="invest-hero-card">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <h2>Patrimônio Total</h2>
+                        <div class="invest-balance">
+                            R$ {{ patrimonio_total|floatformat:2 }}
+                            
+                        </div>
+                        <small style="opacity: 0.8;">
+                        (Conta: R$ {{ saldo_conta|floatformat:2 }} + Investido: R$ {{ total_investido|floatformat:2 }})
+                        </small>
+                    </div>
+                    
+                    <!-- Badge do Perfil -->
+                    <div class="profile-badge">
+                        {% if investidor.perfil_investidor == 'CONSERVADOR' %}
+                            Conservador
+                        {% elif investidor.perfil_investidor == 'MODERADO' %}
+                            Moderado
+                        {% else %}
+                            Arrojado
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Área de Projeção (Calculada na View) -->
+                <div style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1rem;">
+                    <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        Projeção de Rendimento (1 Ano)
+                    </p>
+                    
+                    <div class="projection-container">
+                        <div class="projection-box">
+                            <span class="projection-label">Taxa Aplicada</span>
+                            <div class="projection-value">
+                                {% if investidor.perfil_investidor == 'CONSERVADOR' %}8%{% elif investidor.perfil_investidor == 'MODERADO' %}12%{% else %}18%{% endif %} a.a.
+                            </div>
+                        </div>
+                        <div class="projection-box" style="background: rgba(255,255,255,0.2);">
+                            <span class="projection-label">Patrimônio Projetado</span>
+                            <div class="projection-value">
+                                R$ {{ projecao|floatformat:2 }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ações Rápidas -->
+            <h2 class="section-title">Gerenciar Carteira</h2>
+            <div class="grid-cards">
+                
+                <!-- Novo Aporte -->
+                <!-- Link fictício para criar novo investimento -->
+                <a href="{% url 'realizar_investimento_page' %}" class="card-action">
+                    <div class="card-icon" style="color: var(--invest-color); background: var(--invest-bg);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Novo Aporte</h3>
+                        <p class="card-desc">Invista em Renda Fixa, Ações ou Cripto.</p>
+                    </div>
+                </a>
+
+                <!-- Carteira -->
+                <a href="{% url 'listar_investimentos_page' %}" class="card-action">
+                    <div class="card-icon" style="color: var(--text-light);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Carteira</h3>
+                        <p class="card-desc">Informações de rentabilidade.</p>
+                    </div>
+                </a>
+
+            </div>
+
+        {% else %}
+            <!-- CENÁRIO 2: USUÁRIO AINDA NÃO É INVESTIDOR -->
+            
+            <div style="text-align: center; padding: 4rem 1rem; background: #fff; border-radius: 12px; border: 1px solid var(--border-color);">
+                <div style="color: var(--invest-color); margin-bottom: 1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+                <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Comece a investir hoje</h2>
+                <p style="color: var(--text-light); max-width: 500px; margin: 0 auto 2rem auto;">
+                    Você ainda não possui um perfil de investidor. Cadastre-se agora para definir seu perfil (Conservador, Moderado ou Arrojado) e comece a ver seu dinheiro render.
+                </p>
+                
+                <!-- Botão que levaria para o form de POST /api/v1/clientes/ -->
+                <a href="{% url 'criar_perfil_investidor_page' %}" class="btn btn-primary btn-lg" style="background-color: var(--invest-color); border: none;">
+                    Criar Perfil de Investidor
+                </a>
+            </div>
+
+        {% endif %}
+
+    {% endif %}
+</div>
+{% endblock content %}

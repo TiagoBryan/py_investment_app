@@ -1,0 +1,141 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="dashboard-container">
+    
+    <!-- Header com Botão de Novo Investimento -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 class="page-title" style="margin-bottom: 0.2rem; text-align: left;">Minha Carteira</h1>
+            <p style="color: var(--text-light);">Gerencie seus ativos e acompanhe rendimentos.</p>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+             <a href="{% url 'investimentos_dashboard_page' %}" class="btn-outline" style="padding: 0.6rem 1rem; font-size: 0.9rem;">Voltar</a>
+             <a href="{% url 'realizar_investimento_page' %}" class="btn btn-primary btn-invest" style="padding: 0.6rem 1rem; font-size: 0.9rem;">+ Novo Aporte</a>
+        </div>
+    </div>
+
+    <!-- Messages (Sucesso/Erro) -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}" style="background-color: {% if message.tags == 'success' %}#f0fdf4{% endif %}; border-color: {% if message.tags == 'success' %}#bbf7d0{% endif %}; color: {% if message.tags == 'success' %}#166534{% endif %};">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+    {% else %}
+        
+        <!-- Card de Resumo do Topo -->
+        <div class="invest-hero-card" style="padding: 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h2 style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.25rem;">Total em Custódia</h2>
+                <div style="font-size: 2rem; font-weight: 700;">
+                    {% if total_investido > 0 %}
+                        R$ {{ total_investido|floatformat:2 }}
+                    {% else %}
+                    R$ 0,00
+                    {% endif %}
+                    
+                </div>
+            </div>
+            <!-- Ícone decorativo -->
+            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 50%;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            </div>
+        </div>
+
+        <!-- Tabela de Ativos -->
+        {% if investimentos %}
+            <div class="table-container">
+                <table class="invest-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Data Aplicação</th>
+                            <th>Valor Aplicado</th>
+                            <th>Rentabilidade</th>
+                            <th style="text-align: right;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in investimentos %}
+                        <tr>
+                            <td>
+                                <!-- Badge Dinâmica -->
+                                <span class="badge badge-{{ item.tipo_investimento }}">
+                                    {% if item.tipo_investimento == 'RENDA_FIXA' %}Renda Fixa
+                                    {% elif item.tipo_investimento == 'ACOES' %}Ações
+                                    {% elif item.tipo_investimento == 'FUNDOS' %}Fundos
+                                    {% elif item.tipo_investimento == 'CRIPTO' %}Cripto
+                                    {% else %}{{ item.tipo_investimento }}{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ item.data_aplicacao|slice:":10" }}</td> <!-- Formata data simples -->
+                            <td style="font-weight: 600;">R$ {{ item.valor_investido|floatformat:2 }}</td>
+                            <td style="color: var(--success-color);">
+                                <!-- Exemplo visual: Se rentabilidade > 0 mostra seta -->
+                                {% if item.rentabilidade > 0 %}
+                                    ▲ R$ {{ item.rentabilidade|floatformat:2 }}
+                                {% else %}
+                                    R$ 0,00
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                {% if item.ativo %}
+                                    <form method="post" action="{% url 'resgatar_investimento_page' item.id %}" onsubmit="return confirmarResgate(this);" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-redeem">Resgatar</button>
+                                    </form>
+                                {% else %}
+                                    <span style="color: var(--text-light); font-size: 0.85rem;">Resgatado</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <!-- Empty State -->
+            <div style="text-align: center; padding: 3rem; color: var(--text-light);">
+                <p>Você ainda não realizou nenhum investimento.</p>
+                <a href="{% url 'realizar_investimento_page' %}" style="color: var(--invest-color); font-weight: 600;">Começar agora</a>
+            </div>
+        {% endif %}
+
+    {% endif %}
+</div>
+
+<script>
+function confirmarResgate(form) {
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: "btn btn-success",
+            cancelButton: "btn btn-danger"
+        },
+        buttonsStyling: false
+    });
+
+    swalWithBootstrapButtons.fire({
+        title: "Tem certeza?",
+        text: "Essa ação não poderá ser desfeita!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sim, resgatar",
+        cancelButtonText: "Cancelar",
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+
+    return false;
+}
+</script>
+{% endblock content %}

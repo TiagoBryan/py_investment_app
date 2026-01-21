@@ -1,0 +1,91 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="auth-container">
+    <div class="text-center">
+        <!-- Ícone de Maleta/Investimento (Roxo) -->
+        <svg class="status-icon" style="color: var(--invest-color);" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
+
+        <h1 class="page-title">Perfil do Investidor</h1>
+        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+            Para começarmos, precisamos entender seus objetivos e patrimônio inicial.
+        </p>
+    </div>
+
+    <!-- Dicas Visuais para ajudar o usuário a escolher -->
+    <div class="info-box">
+        <h4>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Entenda os Perfis
+        </h4>
+        <ul>
+            <li><strong>Conservador:</strong> Prioriza segurança. Baixo risco (8% a.a).</li>
+            <li><strong>Moderado:</strong> Equilíbrio entre risco e retorno (12% a.a).</li>
+            <li><strong>Arrojado:</strong> Busca rentabilidade máxima. Alto risco (18% a.a).</li>
+        </ul>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <!-- Exibição de erros gerais (ex: Erro de API) -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors.as_text }}
+            </div>
+        {% endif %}
+
+        <!-- Campo: Perfil de Investidor -->
+        <div class="form-group">
+            <label for="{{ form.perfil_investidor.id_for_label }}" class="form-label">
+                {{ form.perfil_investidor.label }}
+            </label>
+            
+            <!-- Renderização manual para garantir controle total -->
+            {{ form.perfil_investidor }}
+
+            {% if form.perfil_investidor.errors %}
+                <div class="form-error-msg" style="display:block">
+                    {{ form.perfil_investidor.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Campo: Patrimônio Total -->
+        <div class="form-group">
+            <label for="{{ form.patrimonio_total.id_for_label }}" class="form-label">
+                {{ form.patrimonio_total.label }}
+            </label>
+            
+            <div class="currency-wrapper">
+                <span class="currency-symbol">R$</span>
+                <!-- O widget já tem a classe 'form-input' definida no forms.py -->
+                {{ form.patrimonio_total }}
+            </div>
+            
+            <small style="color: var(--text-light); font-size: 0.8rem; margin-top: 4px; display: block;">
+                Este valor será usado para calcular suas projeções iniciais.
+            </small>
+
+            {% if form.patrimonio_total.errors %}
+                <div class="form-error-msg" style="display:block">
+                    {{ form.patrimonio_total.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-invest">
+            Confirmar e Criar Perfil
+        </button>
+        
+        <div class="form-footer">
+            <a href="{% url 'investimentos_dashboard_page' %}">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock content %}

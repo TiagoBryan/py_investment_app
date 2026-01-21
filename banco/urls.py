@@ -82,4 +82,22 @@ urlpatterns = [
     # --- Desativação do Usuário ---
     path('users/me/desativar/', views.UserDeactivateFrontEnd.as_view(), 
          name='user_deactivate_page'),
+    
+    # --- Investimentos ---
+    path('investimentos/me/', views.DashboardInvestimentosFrontEnd.as_view(), 
+         name='investimentos_dashboard_page'),
+    path('investimentos/criar-perfil/', views.CriarPerfilInvestidorFrontEnd.
+         as_view(), name='criar_perfil_investidor_page'),
+    
+    path('investimentos/carteira/', 
+         views.ListarInvestimentosFrontEnd.as_view(), 
+         name='listar_investimentos_page'),
+
+
+    path('investimentos/novo/', views.RealizarInvestimentoFrontEnd.as_view(), 
+         name='realizar_investimento_page'),
+
+    path('investimentos/<uuid:investimento_id>/resgatar/', 
+         views.ResgatarInvestimentoFrontEnd.as_view(), 
+         name='resgatar_investimento_page'),
 ]

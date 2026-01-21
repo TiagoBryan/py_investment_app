@@ -1,0 +1,126 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="auth-container">
+
+
+    <div class="text-center">
+        <!-- Ícone Foguete/Crescimento (Roxo) -->
+        <svg class="status-icon" style="color: var(--invest-color);" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+
+        <h1 class="page-title">Novo Aporte</h1>
+        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+            Escolha a modalidade e o valor para investir.
+        </p>
+    </div>
+
+    <!-- Bloco de Saldo Disponível -->
+    <div class="balance-info-card">
+        <div style="display: flex; align-items: center;">
+            <span class="balance-label">Disponível: </span>
+            
+            <!-- Valor Oculto (Padrão) -->
+            <span id="saldo-hidden" class="balance-value" style="letter-spacing: 2px;">••••••</span>
+            
+            <!-- Valor Visível (Inicia escondido) -->
+            <span id="saldo-visible" class="balance-label" style="display: none;">
+                R$ {{ conta.saldo|floatformat:2 }}
+            </span>
+        </div>
+
+        <button type="button" class="balance-toggle-btn" id="toggleSaldo" title="Mostrar/Ocultar Saldo">
+            <!-- Ícone Olho Fechado (Inicia fechado) -->
+            <svg id="eye-icon-saldo" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+        </button>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {{ form.non_field_errors.as_text }}
+            </div>
+        {% endif %}
+
+        <!-- Tipo de Investimento -->
+        <div class="form-group">
+            <label for="{{ form.tipo_investimento.id_for_label }}" class="form-label">
+                {{ form.tipo_investimento.label }}
+            </label>
+            {{ form.tipo_investimento }}
+            
+            {% if form.tipo_investimento.errors %}
+                <div class="form-error-msg" style="display:block">
+                    {{ form.tipo_investimento.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Valor do Aporte -->
+        <div class="form-group">
+            <label for="{{ form.valor_investido.id_for_label }}" class="form-label">
+                {{ form.valor_investido.label }}
+            </label>
+            
+            <div class="currency-wrapper">
+                <span class="currency-symbol" style="color: var(--invest-color);">R$</span>
+                {{ form.valor_investido }}
+            </div>
+            
+            <small style="color: var(--text-light); font-size: 0.8rem; margin-top: 4px; display: block;">
+                Valor mínimo de R$ 1,00. O saldo será deduzido da sua conta.
+            </small>
+
+            {% if form.valor_investido.errors %}
+                <div class="form-error-msg" style="display:block">
+                    {{ form.valor_investido.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-invest">
+            Confirmar Aplicação
+        </button>
+        
+        <div class="form-footer">
+            <a href="{% url 'investimentos_dashboard_page' %}">Cancelar e voltar</a>
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('toggleSaldo');
+        const hiddenSpan = document.getElementById('saldo-hidden');
+        const visibleSpan = document.getElementById('saldo-visible');
+        const eyeIcon = document.getElementById('eye-icon-saldo');
+
+        let isVisible = false;
+
+        toggleBtn.addEventListener('click', function() {
+            isVisible = !isVisible;
+
+            if (isVisible) {
+                // Mostrar Saldo
+                hiddenSpan.style.display = 'none';
+                visibleSpan.style.display = 'inline';
+                // Ícone Olho Aberto
+                eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+            } else {
+                // Ocultar Saldo
+                hiddenSpan.style.display = 'inline';
+                visibleSpan.style.display = 'none';
+                // Ícone Olho Fechado
+                eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+            }
+        });
+    });
+</script>
+{% endblock content %}
