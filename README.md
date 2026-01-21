@@ -29,8 +29,8 @@ Certifique-se de baixar e rodar o repositório da API na porta `8000` (ou config
 
 1. **Clone o repositório:**
    ```bash
-   git clone https://github.com/TiagoBryan/Javer-Bank-App.git
-   cd Javer-Bank-App
+   git clone https://github.com/TiagoBryan/py_investment_app.git
+   cd py_investment_app
    ```
 
 2. **Crie e ative o ambiente virtual:**
