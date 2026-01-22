@@ -131,6 +131,7 @@ function confirmarResgate(form) {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
+            window.showLoader();
             form.submit();
         }
     });

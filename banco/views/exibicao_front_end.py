@@ -121,7 +121,7 @@ class DashboardInvestimentosFrontEnd(TemplateView):
         try:
             url_perfil = f"{settings.API_BASE_URL}/internal/clientes/" 
             resp_perfil = requests.get(url_perfil, headers=headers)
-            
+                     
             if resp_perfil.status_code == 200:
                 clientes = resp_perfil.json()
                 if clientes:

@@ -8,7 +8,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.shortcuts import redirect
 from banco.forms import CriarPerfilInvestidorForm
-from banco.forms import RealizarInvestimentoForm
+from banco.forms import RealizarInvestimentoForm, AtualizarPerfilInvestidorForm
 from django.http import Http404
 
 
@@ -304,3 +304,116 @@ class ResgatarInvestimentoFrontEnd(View):
             messages.error(request, "Erro de conexão.")
 
         return redirect('listar_investimentos_page')
+    
+
+class AtualizarPerfilInvestidorFrontEnd(FormView):
+    template_name = "investimentos_templates/atualizar_perfil.html"
+    form_class = AtualizarPerfilInvestidorForm
+    success_url = reverse_lazy("investimentos_dashboard_page")
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('login_page')
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        token = self.request.session.get('auth_token')
+        headers = {'Authorization': f'Token {token}'}
+        
+        cliente_id = get_cliente_investidor_id(self.request)
+        if cliente_id:
+            url = f"{settings.API_BASE_URL}/internal/clientes/{cliente_id}/"
+            try:
+                resp = requests.get(url, headers=headers)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    initial['perfil_investidor'] = data\
+                        .get('perfil_investidor')
+            except Exception:
+                pass
+        return initial
+
+    def form_valid(self, form):
+        token = self.request.session.get('auth_token')
+        cliente_id = get_cliente_investidor_id(self.request)
+        
+        if not cliente_id:
+            return redirect('home_page')
+
+        url = f"{settings.API_BASE_URL}/internal/clientes/{cliente_id}/"
+        headers = {'Authorization': f'Token {token}', 
+                   'Content-Type': 'application/json'}
+        
+        payload = {
+            'perfil_investidor': form.cleaned_data['perfil_investidor']
+        }
+
+        try:
+            response = requests.patch(url, json=payload, headers=headers)
+        except requests.RequestException:
+            form.add_error(None, "Erro de conexão.")
+            return self.form_invalid(form)
+
+        if response.status_code == 200:
+            messages.success(self.request, "Perfil atualizado com sucesso!")
+            return super().form_valid(form)
+        else:
+            form.add_error(None, "Erro ao atualizar perfil.")
+            return self.form_invalid(form)
+
+
+class DesativarPerfilInvestidorFrontEnd(View):
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return redirect('login_page')
+
+        token = request.session.get('auth_token')
+        cliente_id = get_cliente_investidor_id(request)
+        
+        if not cliente_id:
+            messages.error(request, "Perfil não encontrado.")
+            return redirect('home_page')
+
+        url = f"{settings.API_BASE_URL}/internal/clientes/{cliente_id}/"
+        headers = {'Authorization': f'Token {token}'}
+
+        try:
+            response = requests.delete(url, headers=headers)
+            
+            if response.status_code == 204:
+                messages.success(request, 
+                                 "Perfil de investidor cancelado com sucesso.")
+                return redirect('home_page')
+            
+            elif response.status_code == 400:
+                try:
+                    data = response.json()
+                    
+                    msg = "Não foi possível realizar a operação."
+
+                    if isinstance(data, list):
+                        msg = data[0]
+                    elif isinstance(data, dict):
+                        if 'detail' in data:
+                            msg = data['detail']
+                        else:
+                            first_val = next(iter(data.values()))
+                            msg = first_val[0] if isinstance(first_val, list) \
+                                else first_val
+                    
+                    messages.error(request, msg)
+                except Exception as e:
+                    print(f"Erro ao ler JSON de erro: {e}")
+                    messages.error(request, 
+                                   "Não foi possível cancelar o perfil devido "
+                                   "a restrições.")
+            
+            else:
+                messages.error(request, 
+                               f"Erro inesperado: {response.status_code}")
+
+        except requests.RequestException:
+            messages.error(request, "Erro de conexão com o servidor.")
+
+        return redirect('atualizar_perfil_investidor_page')

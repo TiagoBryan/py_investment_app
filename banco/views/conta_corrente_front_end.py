@@ -74,6 +74,9 @@ class ContaCorrenteDeactivateFrontEnd(FormView):
 
         headers = {'Authorization': f'Token {token}'}
 
+        total_investido = 0.0
+        meu_perfil = None
+
         try:
             response = requests.get(
                 f"{settings.API_BASE_URL}/contas/", 
@@ -88,7 +91,38 @@ class ContaCorrenteDeactivateFrontEnd(FormView):
 
         except requests.RequestException:
             context['api_error'] = "Impossivel carregar os dados da conta."
+
+        try:
+            url_perfil = f"{settings.API_BASE_URL}/internal/clientes/" 
+            resp_perfil = requests.get(url_perfil, headers=headers)
+                     
+            if resp_perfil.status_code == 200:
+                clientes = resp_perfil.json()
+                if clientes:
+                    meu_perfil = clientes[0]
+                    
+                    cliente_id = meu_perfil['id']
+                    
+                    base = f"{settings.API_BASE_URL}/internal/investimentos/"
+
+                    url_inv = f"{base}cliente/{cliente_id}/"
+                    try:
+                        resp_inv = requests.get(url_inv, headers=headers)
+                        if resp_inv.status_code == 200:
+                            investimentos = resp_inv.json()
+                            total_investido = sum(float(i['valor_investido']) 
+                                                  for i in investimentos if 
+                                                  i.get('ativo', True))
+                    except Exception:
+                        total_investido = 0.0
+
+        except Exception as e:
+            print(f"Erro no dashboard: {e}")
+            context['error'] = "Serviço de investimentos indisponível no " \
+                               "momento."
         
+        context['total_investido'] = total_investido
+            
         return context
 
     def form_valid(self, form):

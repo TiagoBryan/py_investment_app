@@ -51,6 +51,46 @@ a:hover {
     color: var(--primary-color);
 }
 
+/* Overlay que cobre a tela toda */
+#global-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8); /* Fundo branco levemente transparente */
+    z-index: 9999; /* Fica acima de tudo */
+    display: none; /* Escondido por padrão */
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    backdrop-filter: blur(2px); /* Efeito de desfoque moderno */
+}
+
+/* O círculo giratório */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #e2e8f0; /* Cor cinza claro */
+    border-top: 5px solid var(--primary-color, #0f172a); /* Cor principal do seu tema */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+/* Texto abaixo do spinner */
+.loader-text {
+    font-family: sans-serif;
+    color: var(--text-main, #333);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* --- Header Estilizado --- */
 .main-header {
     background-color: var(--primary-color);
@@ -191,6 +231,7 @@ a:hover {
 
 .btn-primary:hover {
     background-color: var(--primary-hover);
+    color: #fff;
 }
 
 .btn-primary:active {
@@ -918,4 +959,86 @@ a:hover {
 .btn-redeem:hover {
     background: var(--error-color);
     color: #fff;
+}
+
+/* --- Gráfico de Projeção --- */
+.chart-card {
+    background: #ffffff;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.chart-badge {
+    font-size: 0.8rem;
+    background: var(--invest-bg);
+    color: var(--invest-color);
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+/* --- Zona de Perigo (Configurações) --- */
+.danger-zone {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.danger-box {
+    border: 1px solid #fecaca; /* Vermelho claro */
+    background-color: #fef2f2;
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.danger-title {
+    color: #991b1b; /* Vermelho escuro */
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.danger-desc {
+    font-size: 0.85rem;
+    color: #7f1d1d;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+/* Botão de Configurações (Header) */
+.btn-settings {
+    background: transparent;
+    color: var(--text-light);
+    border: 1px solid var(--primary-color);
+    padding: 0.5rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-settings:hover {
+    background-color: #f1f5f9;
+    color: var(--primary-color);
+    border-color: var(--text-light);
 }

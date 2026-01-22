@@ -27,6 +27,12 @@
                 R$ {{ conta.saldo|floatformat:2 }}
             </span>
         </div>
+        <div class="summary-row">
+            <span class="summary-label">Total Investido</span>
+            <span class="summary-value" style="color: {% if conta.saldo > 0 %}var(--success-color){% else %}var(--text-main){% endif %};">
+                R$ {{ total_investido|floatformat:2 }}
+            </span>
+        </div>
     </div>
 
     <!-- Aviso de Bloqueio -->
@@ -34,6 +40,11 @@
     {% if conta.saldo != "0.00" %}
         <div class="alert alert-error">
             <strong>Ação Bloqueada:</strong> O saldo da conta deve estar zerado (R$ 0,00) para realizar o encerramento. Realize um saque ou transferência total antes de prosseguir.
+        </div>
+        <a href="{% url 'home_page' %}" class="btn btn-primary">Voltar ao Início</a>
+    {% elif total_investido != "0.00" %}
+        <div class="alert alert-error">
+            <strong>Ação Bloqueada:</strong> Os seus investimentos devem estar zerado (R$ 0,00) para realizar o encerramento. Resgate-os totalmente antes de prosseguir.
         </div>
         <a href="{% url 'home_page' %}" class="btn btn-primary">Voltar ao Início</a>
     {% else %}

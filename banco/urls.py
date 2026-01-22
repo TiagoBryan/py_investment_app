@@ -100,4 +100,11 @@ urlpatterns = [
     path('investimentos/<uuid:investimento_id>/resgatar/', 
          views.ResgatarInvestimentoFrontEnd.as_view(), 
          name='resgatar_investimento_page'),
+
+    path('investimentos/perfil/editar/', 
+         views.AtualizarPerfilInvestidorFrontEnd.as_view(), 
+         name='atualizar_perfil_investidor_page'),
+    path('investimentos/perfil/desativar/', 
+         views.DesativarPerfilInvestidorFrontEnd.as_view(), 
+         name='desativar_perfil_investidor_page'),
 ]

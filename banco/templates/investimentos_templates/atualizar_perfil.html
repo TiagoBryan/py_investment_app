@@ -1,0 +1,110 @@
+{% extends "global/base.html" %}
+{% block header %}
+{% include "global/partials/_header.html" %}
+{% endblock header %}
+{% block content %}
+<div class="auth-container">
+    
+    <div class="text-center">
+        <!-- Ícone de Engrenagem/Ajuste (Roxo) -->
+        <svg class="status-icon" style="color: var(--invest-color);" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+
+        <h1 class="page-title">Gerenciar Perfil</h1>
+        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
+            Ajuste sua estratégia de rentabilidade.
+        </p>
+    </div>
+    <!-- BLOCO DE MENSAGENS (Aqui aparecerá o erro da exclusão) -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Info Box: Lembrete das taxas -->
+    <div class="info-box">
+        <h4>Lembrete de Rentabilidade</h4>
+        <ul style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+            <li><strong>Conservador:</strong> 8% a.a.</li>
+            <li><strong>Moderado:</strong> 12% a.a.</li>
+            <li><strong>Arrojado:</strong> 18% a.a.</li>
+        </ul>
+    </div>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div class="alert alert-error">{{ form.non_field_errors.as_text }}</div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="{{ form.perfil_investidor.id_for_label }}" class="form-label">
+                {{ form.perfil_investidor.label }}
+            </label>
+            <!-- A classe form-input deve vir do seu forms.py, senão adicione manualmente aqui -->
+            {{ form.perfil_investidor }}
+            
+            {% if form.perfil_investidor.errors %}
+                <div class="form-error-msg" style="display:block">
+                    {{ form.perfil_investidor.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-invest">Salvar Alterações</button>
+        <div class="form-footer">
+            <a href="{% url 'investimentos_dashboard_page' %}">Voltar ao Dashboard</a>
+        </div>
+    </form>
+
+    <!-- Zona de Perigo -->
+    <div class="danger-zone">
+        <div class="danger-box">
+            <h3 class="danger-title">Encerrar Carreira de Investidor</h3>
+            <p class="danger-desc">
+                Esta ação é irreversível. Seu perfil e histórico de projeções serão apagados.<br>
+                <strong>Nota:</strong> Você deve resgatar todos os seus investimentos (saldo zerado) antes de prosseguir.
+            </p>
+            
+            <form method="post" action="{% url 'desativar_perfil_investidor_page' %}" onsubmit="return confirmarResgate(this);">
+                {% csrf_token %}
+                <button type="submit" class="btn-outline" style="color: #991b1b; border-color: #fecaca; background: white; font-size: 0.9rem;">
+                    Excluir Perfil Definitivamente
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+<script>
+    function confirmarResgate(form) {
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: "btn btn-success",
+            cancelButton: "btn btn-danger"
+        },
+        buttonsStyling: false
+    });
+
+    swalWithBootstrapButtons.fire({
+        title: "Tem certeza?",
+        text: "Essa ação não poderá ser desfeita!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sim, Excluir",
+        cancelButtonText: "Cancelar",
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.showLoader();
+            form.submit();
+        }
+    });
+
+    return false;
+}
+</script>
+{% endblock content %}

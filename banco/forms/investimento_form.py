@@ -46,3 +46,17 @@ class RealizarInvestimentoForm(forms.Form):
         widget=forms.NumberInput(attrs={'class': 'form-input', 
                                         'placeholder': '0.00'})
     )
+
+
+class AtualizarPerfilInvestidorForm(forms.Form):
+    PERFIL_CHOICES = [
+        ("CONSERVADOR", "Conservador (Baixo Risco)"),
+        ("MODERADO", "Moderado (Médio Risco)"),
+        ("ARROJADO", "Arrojado (Alto Risco)"),
+    ]
+
+    perfil_investidor = forms.ChoiceField(
+        label="Novo Perfil Desejado",
+        choices=PERFIL_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-input'})
+    )
