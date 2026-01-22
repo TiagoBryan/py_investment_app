@@ -150,7 +150,9 @@ class DashboardInvestimentosFrontEnd(TemplateView):
                             investimentos = resp_inv.json()
                             total_investido = sum(float(i['valor_investido']) 
                                                   for i in investimentos if 
-                                                  i.get('ativo', True))
+                                                  i.get('ativo', True) and 
+                                                  i.get('tipo_investimento', 
+                                                        'RENDA_FIXA'))
                     except Exception:
                         total_investido = 0.0
 
@@ -165,7 +167,8 @@ class DashboardInvestimentosFrontEnd(TemplateView):
                     else:
                         taxa = 0.18
                     
-                    context['projecao'] = patrimonio_total * (1 + taxa)
+                    context['renda_fixa'] = total_investido
+                    context['projecao'] = total_investido * (1 + taxa)
 
         except Exception as e:
             print(f"Erro no dashboard: {e}")

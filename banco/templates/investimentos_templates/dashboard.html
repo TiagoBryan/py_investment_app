@@ -55,13 +55,13 @@
                 <div style="margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 1rem;">
                     <div class="projection-container">
                         <div class="projection-box">
-                            <span class="projection-label">Taxa Anual</span>
+                            <span class="projection-label">Taxa Anual (Renda Fixa)</span>
                             <div class="projection-value">
                                 {% if investidor.perfil_investidor == 'CONSERVADOR' %}8%{% elif investidor.perfil_investidor == 'MODERADO' %}12%{% else %}18%{% endif %}
                             </div>
                         </div>
                         <div class="projection-box" style="background: rgba(255,255,255,0.2);">
-                            <span class="projection-label">Em 12 meses (Estimado)</span>
+                            <span class="projection-label">Em 12 meses (Estimado - Renda Fixa)</span>
                             <div class="projection-value">
                                 R$ {{ projecao|floatformat:2 }}
                             </div>
@@ -73,7 +73,7 @@
             <!-- NOVO: Gráfico de Projeção Mensal -->
             <div class="chart-card">
                 <div class="chart-header">
-                    <h3 class="chart-title">Evolução Projetada (Juros Compostos)</h3>
+                    <h3 class="chart-title">Evolução Projetada (Juros Compostos - Renda Fixa)</h3>
                     <span class="chart-badge">Próximos 12 Meses</span>
                 </div>
                 <!-- O gráfico será renderizado aqui -->
@@ -129,7 +129,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         // 1. Recuperar dados do Django Template
         // Convertendo string '1000,00' para float JS
-        const rawPatrimonio = "{{ patrimonio_total }}".replace(',', '.');
+        const rawPatrimonio = "{{ renda_fixa }}".replace(',', '.');
         let patrimonioAtual = parseFloat(rawPatrimonio);
         
         const perfil = "{{ investidor.perfil_investidor }}";
