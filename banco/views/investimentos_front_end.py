@@ -12,6 +12,29 @@ from banco.forms import RealizarInvestimentoForm, AtualizarPerfilInvestidorForm
 from django.http import Http404
 
 
+class MarketDataAjaxView(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+        token = request.session.get('auth_token')
+        headers = {'Authorization': f'Token {token}'}
+        
+        params = request.GET.copy()
+        
+        url = f"{settings.API_BASE_URL}/internal/market/"
+
+        try:
+            response = requests.get(url, headers=headers, params=params, 
+                                    timeout=5)
+            
+            return JsonResponse(response.json(), status=response.status_code)
+            
+        except requests.RequestException:
+            return JsonResponse({'error': 'Erro de comunicação com a API'}, 
+                                status=503)
+
+
 class ProjecaoRetornoFrontEnd(View):
     def get(self, request, cliente_id):
         token = request.session.get('auth_token')
@@ -211,20 +234,26 @@ class RealizarInvestimentoFrontEnd(FormView):
 
     def form_valid(self, form):
         token = self.request.session.get('auth_token')
-        
         cliente_id = get_cliente_investidor_id(self.request)
         
         if not cliente_id:
             messages.error(self.request, 
-                           "Você precisa criar um perfil de investidor antes.")
+                           "Crie um perfil de investidor primeiro.")
             return redirect('criar_perfil_investidor_page')
 
+        data = form.cleaned_data
+        
         payload = {
             'cliente': cliente_id,
-            'tipo_investimento': form.cleaned_data['tipo_investimento'],
-            'valor_investido': float(form.cleaned_data['valor_investido']),
+            'tipo_investimento': data['tipo_investimento'],
             'ativo': True
         }
+
+        if data['tipo_investimento'] == 'RENDA_FIXA':
+            payload['valor_investido'] = float(data['valor_investido'])
+        else:
+            payload['ticker'] = data['ticker'].upper()
+            payload['quantidade'] = float(data['quantidade'])
 
         url = f"{settings.API_BASE_URL}/internal/investimentos/"
         headers = {
@@ -239,38 +268,35 @@ class RealizarInvestimentoFrontEnd(FormView):
             return self.form_invalid(form)
 
         if response.status_code == 201:
-            messages.success(self.request, 
-                             "Investimento realizado com sucesso!")
+            dados_retorno = response.json()
+            valor_final = dados_retorno.get('valor_investido', 0)
+            ticker_final = dados_retorno.get('ticker', 'Renda Fixa')
+            
+            msg = f"Investimento realizado! Compra de {ticker_final}\
+                  totalizando R$ {float(valor_final):.2f}"
+            messages.success(self.request, msg)
+            
             return super().form_valid(form)
         else:
             try:
                 data = response.json()
-                
                 if isinstance(data, list):
-                    for erro in data:
+                    for erro in data: 
                         form.add_error(None, erro)
-
                 elif isinstance(data, dict):
-                    if 'detail' in data:
+                    if 'detail' in data: 
                         form.add_error(None, data['detail'])
-                    
                     for field, msgs in data.items():
                         if field == 'detail': 
                             continue
-
                         if field in form.fields:
-                            if isinstance(msgs, list):
-                                for msg in msgs:
-                                    form.add_error(field, msg)
-                            else:
-                                form.add_error(field, msgs)
+                            ms = msgs if isinstance(msgs, list) else [msgs]
+                            for m in ms: 
+                                form.add_error(field, m)
                         else:
-                            form.add_error(None, f"{msgs}")
-            
-            except Exception as e:
-                print(f"Erro ao processar JSON: {e}")
-                form.add_error(None, 
-                               "Erro ao processar a resposta do servidor.")
+                            form.add_error(None, str(msgs))
+            except Exception:
+                form.add_error(None, "Erro desconhecido na API.")
             
             return self.form_invalid(form)
 

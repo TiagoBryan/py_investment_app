@@ -107,4 +107,7 @@ urlpatterns = [
     path('investimentos/perfil/desativar/', 
          views.DesativarPerfilInvestidorFrontEnd.as_view(), 
          name='desativar_perfil_investidor_page'),
+    path('ajax/market/', views.MarketDataAjaxView.as_view(), 
+         name='ajax_market_data'),
+
 ]

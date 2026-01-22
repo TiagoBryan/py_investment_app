@@ -69,7 +69,7 @@
                 <strong>Nota:</strong> Você deve resgatar todos os seus investimentos (saldo zerado) antes de prosseguir.
             </p>
             
-            <form method="post" action="{% url 'desativar_perfil_investidor_page' %}" onsubmit="return confirmarResgate(this);">
+            <form method="post" data-no-loader action="{% url 'desativar_perfil_investidor_page' %}" onsubmit="return confirmarResgate(this);">
                 {% csrf_token %}
                 <button type="submit" class="btn-outline" style="color: #991b1b; border-color: #fecaca; background: white; font-size: 0.9rem;">
                     Excluir Perfil Definitivamente

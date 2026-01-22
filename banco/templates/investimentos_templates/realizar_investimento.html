@@ -2,125 +2,285 @@
 {% block header %}
 {% include "global/partials/_header.html" %}
 {% endblock header %}
+
 {% block content %}
-<div class="auth-container">
-
-
-    <div class="text-center">
-        <!-- Ícone Foguete/Crescimento (Roxo) -->
-        <svg class="status-icon" style="color: var(--invest-color);" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-        </svg>
-
-        <h1 class="page-title">Novo Aporte</h1>
-        <p style="color: var(--text-light); margin-bottom: 1.5rem;">
-            Escolha a modalidade e o valor para investir.
-        </p>
+<div class="dashboard-container">
+    
+    <div style="margin-bottom: 2rem;">
+        <h1 class="page-title" style="margin-bottom: 0.5rem; text-align: left;">Novo Aporte</h1>
+        <p style="color: var(--text-light);">Selecione o ativo e simule sua aplicação.</p>
     </div>
 
-    <!-- Bloco de Saldo Disponível -->
-    <div class="balance-info-card">
-        <div style="display: flex; align-items: center;">
-            <span class="balance-label">Disponível: </span>
-            
-            <!-- Valor Oculto (Padrão) -->
-            <span id="saldo-hidden" class="balance-value" style="letter-spacing: 2px;">••••••</span>
-            
-            <!-- Valor Visível (Inicia escondido) -->
-            <span id="saldo-visible" class="balance-label" style="display: none;">
-                R$ {{ conta.saldo|floatformat:2 }}
-            </span>
-        </div>
-
-        <button type="button" class="balance-toggle-btn" id="toggleSaldo" title="Mostrar/Ocultar Saldo">
-            <!-- Ícone Olho Fechado (Inicia fechado) -->
-            <svg id="eye-icon-saldo" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                <line x1="1" y1="1" x2="23" y2="23"></line>
-            </svg>
-        </button>
-    </div>
-
-    <form method="post" novalidate>
-        {% csrf_token %}
-
-        {% if form.non_field_errors %}
-            <div class="alert alert-error">
-                {{ form.non_field_errors.as_text }}
-            </div>
-        {% endif %}
-
-        <!-- Tipo de Investimento -->
-        <div class="form-group">
-            <label for="{{ form.tipo_investimento.id_for_label }}" class="form-label">
-                {{ form.tipo_investimento.label }}
-            </label>
-            {{ form.tipo_investimento }}
-            
-            {% if form.tipo_investimento.errors %}
-                <div class="form-error-msg" style="display:block">
-                    {{ form.tipo_investimento.errors.0 }}
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- Valor do Aporte -->
-        <div class="form-group">
-            <label for="{{ form.valor_investido.id_for_label }}" class="form-label">
-                {{ form.valor_investido.label }}
-            </label>
-            
-            <div class="currency-wrapper">
-                <span class="currency-symbol" style="color: var(--invest-color);">R$</span>
-                {{ form.valor_investido }}
-            </div>
-            
-            <small style="color: var(--text-light); font-size: 0.8rem; margin-top: 4px; display: block;">
-                Valor mínimo de R$ 1,00. O saldo será deduzido da sua conta.
-            </small>
-
-            {% if form.valor_investido.errors %}
-                <div class="form-error-msg" style="display:block">
-                    {{ form.valor_investido.errors.0 }}
-                </div>
-            {% endif %}
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-invest">
-            Confirmar Aplicação
-        </button>
+    <!-- Layout de Grid (Form Esquerda / Resumo Direita) -->
+    <div class="grid-layout">
         
-        <div class="form-footer">
-            <a href="{% url 'investimentos_dashboard_page' %}">Cancelar e voltar</a>
+        <!-- COLUNA DA ESQUERDA: Formulário -->
+        <div>
+            <!-- Card de Poder de Compra -->
+            <div class="balance-card">
+                <div>
+                    <span style="font-size: 0.75rem; color: #64748b; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Disponível para Investir</span>
+                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color); margin-top: 4px;">
+                        R$ {{ conta.saldo|floatformat:2 }}
+                    </div>
+                </div>
+                <div style="background: #eff6ff; color: #2563eb; padding: 0.75rem; border-radius: 12px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                </div>
+            </div>
+
+            <form method="post" novalidate id="investForm" class="auth-container" style="max-width: 100%; box-shadow: none; padding: 0; background: transparent;">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-error">{{ form.non_field_errors.as_text }}</div>
+                {% endif %}
+
+                <!-- Tipo de Investimento -->
+                <div class="form-group">
+                    <label class="form-label">Categoria</label>
+                    {{ form.tipo_investimento }} <!-- Widget Select padrão do Django com class='form-input' -->
+                </div>
+
+                <!-- SEÇÃO RENDA VARIÁVEL (Ativa via JS) -->
+                <div id="variable-section">
+                    <div class="form-group">
+                        <label class="form-label">Buscar Ativo</label>
+                        <div class="search-wrapper">
+            
+                            <input type="text" id="asset-search" class="form-input" placeholder="Ex: PETR4, AAPL, BTC..." autocomplete="off">
+                            
+                            <div class="visually-hidden">
+                                {{ form.ticker }} 
+                            </div>
+                            
+                            <button type="button" id="btn-search" class="btn btn-primary btn-invest" style="width: auto; padding: 0 1.2rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Dropdown de Resultados -->
+                        <div id="search-results" class="search-results-dropdown"></div>
+                        
+                        {% if form.ticker.errors %}
+                            <div class="form-error-msg" style="display:block">{{ form.ticker.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Quantidade</label>
+                        {{ form.quantidade }} <!-- Widget Number -->
+                        {% if form.quantidade.errors %}
+                            <div class="form-error-msg" style="display:block">{{ form.quantidade.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- SEÇÃO RENDA FIXA (Ativa via JS) -->
+                <div id="fixed-section" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Valor do Aporte (R$)</label>
+                        <div class="currency-wrapper">
+                            <span class="currency-symbol">R$</span>
+                            {{ form.valor_investido }}
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary btn-invest">Confirmar Ordem</button>
+                    <a href="{% url 'listar_investimentos_page' %}" class="btn-outline" style="display: flex ;text-align: center; align-items: center;">Cancelar</a>
+                </div>
+            </form>
         </div>
-    </form>
+
+        <!-- COLUNA DA DIREITA: Resumo da Ordem (Sticky) -->
+        <div>
+            <div class="order-summary">
+                <h3 class="summary-header">Resumo da Ordem</h3>
+                
+                <!-- Estado Vazio -->
+                <div id="summary-placeholder" style="text-align: center; color: var(--text-light); padding: 2rem 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3; margin-bottom: 1rem;"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+                    <p style="font-size: 0.9rem;">Busque um ativo para visualizar a cotação.</p>
+                </div>
+
+                <!-- Conteúdo Preenchido -->
+                <div id="summary-content" style="display: none;">
+                    <div class="summary-row">
+                        <span class="summary-label">Ativo</span>
+                        <strong class="summary-val" id="preview-ticker">---</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Cotação Atual</span>
+                        <strong class="summary-val" id="preview-price">R$ 0,00</strong>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Quantidade</span>
+                        <strong class="summary-val" id="preview-qtd">0</strong>
+                    </div>
+                    
+                    <div class="summary-total">
+                        <span style="color: var(--primary-color); font-weight: 600;">Total Estimado</span>
+                        <div style="text-align: right;">
+                            <div class="total-value" id="preview-total">R$ 0,00</div>
+                            <small id="error-balance" style="color: var(--error-color); display: none; font-weight: 600; margin-top: 5px;">
+                                Saldo insuficiente
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
+
+<!-- Lógica JS (Mantida a sua, apenas ajustada para os novos IDs/Classes se necessário) -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const toggleBtn = document.getElementById('toggleSaldo');
-        const hiddenSpan = document.getElementById('saldo-hidden');
-        const visibleSpan = document.getElementById('saldo-visible');
-        const eyeIcon = document.getElementById('eye-icon-saldo');
+        const typeSelect = document.getElementById('tipo_investimento'); // Django ID padrao é id_nomecampo
+        const varSection = document.getElementById('variable-section');
+        const fixSection = document.getElementById('fixed-section');
+        
+        const inputSearch = document.getElementById('asset-search');
+        const inputTickerReal = document.querySelector('[name="ticker"]'); 
+        const inputQtd = document.querySelector('[name="quantidade"]');
+        const btnSearch = document.getElementById('btn-search');
+        const listResults = document.getElementById('search-results');
 
-        let isVisible = false;
+        const boxContent = document.getElementById('summary-content');
+        const boxPlaceholder = document.getElementById('summary-placeholder');
+        const txtTicker = document.getElementById('preview-ticker');
+        const txtPrice = document.getElementById('preview-price');
+        const txtQtd = document.getElementById('preview-qtd');
+        const txtTotal = document.getElementById('preview-total');
+        const msgError = document.getElementById('error-balance');
 
-        toggleBtn.addEventListener('click', function() {
-            isVisible = !isVisible;
+        let currentPrice = 0;
+        // Parse float seguro do Django template
+        const userBalance = parseFloat("{{ conta.saldo|stringformat:'f' }}");
 
-            if (isVisible) {
-                // Mostrar Saldo
-                hiddenSpan.style.display = 'none';
-                visibleSpan.style.display = 'inline';
-                // Ícone Olho Aberto
-                eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+        // 1. Toggle Tipo
+        function toggleType() {
+            // Nota: Verifique se o value é 'RENDA_FIXA' ou o ID numérico, dependendo do seu choice field
+            if (typeSelect.value === 'RENDA_FIXA') {
+                fixSection.style.display = 'block';
+                varSection.style.display = 'none';
+                resetPreview();
             } else {
-                // Ocultar Saldo
-                hiddenSpan.style.display = 'inline';
-                visibleSpan.style.display = 'none';
-                // Ícone Olho Fechado
-                eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
+                fixSection.style.display = 'none';
+                varSection.style.display = 'block';
+            }
+        }
+        if(typeSelect) {
+            typeSelect.addEventListener('change', toggleType);
+            toggleType();
+        }
+
+        // --- 2. Busca (Autocomplete) ---
+        inputSearch.addEventListener('input', async function(e) {
+            const query = e.target.value;
+            listResults.innerHTML = '';
+            
+            if (query.length < 2) {
+                listResults.style.display = 'none';
+                return;
+            }
+
+            try {
+                // Simulação ou chamada real
+                // Substitua pela sua URL real: `/ajax/market/?action=search&q=${query}`
+                // Aqui estou usando um mock para demonstração visual
+                const response = await fetch(`/ajax/market/?action=search&q=${query}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if(data.length > 0){
+                        listResults.style.display = 'block';
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'search-item';
+                            div.innerHTML = `<strong>${item.ticker}</strong> <span>${item.nome}</span>`;
+                            div.addEventListener('click', function() {
+                                inputSearch.value = item.ticker;
+                                inputTickerReal.value = item.ticker;
+                                listResults.style.display = 'none';
+                                btnSearch.click();
+                            });
+                            listResults.appendChild(div);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.log("Erro autocomplete");
             }
         });
+
+        // Fechar dropdown ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (e.target !== inputSearch) listResults.style.display = 'none';
+        });
+
+        // --- 3. Cotação ---
+        btnSearch.addEventListener('click', async function() {
+            const ticker = inputSearch.value.toUpperCase();
+            if(!ticker) return;
+            
+            if(inputTickerReal) inputTickerReal.value = ticker; 
+            
+            boxPlaceholder.style.display = 'none';
+            boxContent.style.display = 'block';
+            
+            txtTicker.innerText = ticker;
+            txtPrice.innerHTML = '<span class="spinner-sm"></span>';
+            txtTotal.innerText = '---';
+
+            try {
+                const response = await fetch(`/ajax/market/?action=quote&ticker=${ticker}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentPrice = data.price;
+                    txtPrice.innerText = `R$ ${currentPrice.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                    updateTotal();
+                } else {
+                    txtPrice.innerText = 'N/A';
+                    alert("Ativo não encontrado.");
+                }
+            } catch (e) {
+                txtPrice.innerText = 'Erro';
+            }
+        });
+
+        // 4. Cálculo Total
+        if(inputQtd) {
+            inputQtd.addEventListener('input', function() {
+                const qtd = parseFloat(this.value || 0);
+                txtQtd.innerText = qtd;
+                updateTotal();
+            });
+        }
+
+        function updateTotal() {
+            const qtd = parseFloat(inputQtd.value || 0);
+            const total = qtd * currentPrice;
+            
+            txtTotal.innerText = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            
+            if (total > userBalance) {
+                msgError.style.display = 'block';
+                txtTotal.style.color = 'var(--error-color)';
+            } else {
+                msgError.style.display = 'none';
+                txtTotal.style.color = 'var(--invest-color)';
+            }
+        }
+        
+        function resetPreview() {
+            boxContent.style.display = 'none';
+            boxPlaceholder.style.display = 'block';
+        }
     });
 </script>
 {% endblock content %}
