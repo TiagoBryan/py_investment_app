@@ -212,7 +212,7 @@
                         });
                     }
                 }
-            } catch (err) {
+            } catch(err) {
                 console.log("Erro autocomplete");
             }
         });
@@ -241,14 +241,30 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    currentPrice = data.price;
-                    txtPrice.innerText = `R$ ${currentPrice.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-                    updateTotal();
-                } else {
-                    txtPrice.innerText = 'N/A';
-                    alert("Ativo não encontrado.");
+                    
+                    let precoExibicao = data.price;
+                    let moedaSymbol = 'R$';
+                    let taxaConversao = 1;
+
+                    if (data.currency === 'USD') {
+                        moedaSymbol = 'US$';
+                        taxaConversao = data.exchange_rate;
+                        
+                        currentPrice = data.price * taxaConversao; 
+                        
+                        txtPrice.innerHTML = `
+                            US$ ${data.price.toLocaleString('en-US', {minimumFractionDigits: 2})}
+                            <div style="font-size:0.7em; color:#64748b;">
+                                (Cotação Dólar: R$ ${taxaConversao.toFixed(2)})<br>
+                                <strong>Preço em BRL: R$ ${currentPrice.toFixed(2)}</strong>
+                            </div>
+                        `;
+                    } else {
+                        currentPrice = data.price;
+                        txtPrice.innerText = `R$ ${currentPrice.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                    }
                 }
-            } catch (e) {
+            } catch(e) {
                 txtPrice.innerText = 'Erro';
             }
         });
