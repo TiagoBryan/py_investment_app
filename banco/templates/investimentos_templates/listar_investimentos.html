@@ -1,26 +1,33 @@
 {% extends "global/base.html" %}
 {% block header %}
-{% include "global/partials/_header.html" %}
+    {% include "global/partials/_header.html" %}
+    <!-- SweetAlert2 para o modal de confirmação bonito -->
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock header %}
+
 {% block content %}
 <div class="dashboard-container">
     
-    <!-- Header com Botão de Novo Investimento -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <!-- Cabeçalho com Ações -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div>
             <h1 class="page-title" style="margin-bottom: 0.2rem; text-align: left;">Minha Carteira</h1>
-            <p style="color: var(--text-light);">Gerencie seus ativos e acompanhe rendimentos.</p>
+            <p style="color: var(--text-light);">Análise de performance e custódia de ativos.</p>
         </div>
         <div style="display: flex; gap: 1rem;">
-             <a href="{% url 'investimentos_dashboard_page' %}" class="btn-outline" style="padding: 0.6rem 1rem; font-size: 0.9rem;">Voltar</a>
-             <a href="{% url 'realizar_investimento_page' %}" class="btn btn-primary btn-invest" style="padding: 0.6rem 1rem; font-size: 0.9rem;">+ Novo Aporte</a>
+             <a href="{% url 'investimentos_dashboard_page' %}" class="btn-outline" style="padding: 0.6rem 1.2rem;">Voltar</a>
+             <a href="{% url 'realizar_investimento_page' %}" class="btn btn-primary btn-invest" style="padding: 0.6rem 1.2rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Novo Aporte
+             </a>
         </div>
     </div>
 
-    <!-- Messages (Sucesso/Erro) -->
+    <!-- MENSAGENS DO SISTEMA -->
     {% if messages %}
         {% for message in messages %}
-            <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}" style="background-color: {% if message.tags == 'success' %}#f0fdf4{% endif %}; border-color: {% if message.tags == 'success' %}#bbf7d0{% endif %}; color: {% if message.tags == 'success' %}#166534{% endif %};">
+            <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}" style="margin-bottom: 2rem;">
                 {{ message }}
             </div>
         {% endfor %}
@@ -28,114 +35,334 @@
 
     {% if error %}
         <div class="alert alert-error">{{ error }}</div>
-    {% else %}
+    {% endif %}
+
+    <!-- ========================================== -->
+    <!-- DASHBOARD ANALÍTICO                        -->
+    <!-- ========================================== -->
+    {% if metrics %}
+    
+    <!-- 1. KPIs (Cards de Métricas) -->
+    <div class="metrics-grid">
         
-        <!-- Card de Resumo do Topo -->
-        <div class="invest-hero-card" style="padding: 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;">
-            <div>
-                <h2 style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.25rem;">Total em Custódia</h2>
-                <div style="font-size: 2rem; font-weight: 700;">
-                    {% if total_investido > 0 %}
-                        R$ {{ total_investido|floatformat:2 }}
-                    {% else %}
-                    R$ 0,00
-                    {% endif %}
-                    
-                </div>
+        <!-- Retorno Total Acumulado -->
+        <div class="metric-card">
+            <div class="metric-title">Rentabilidade Acumulada</div>
+            <div class="metric-value" style="color: {% if metrics.retorno_total_pct >= 0 %}var(--success-color){% else %}var(--error-color){% endif %};">
+                {{ metrics.retorno_total_pct|floatformat:2 }}%
+                
+                <!-- Badge visual -->
+                <span class="trend-pill {% if metrics.retorno_total_pct >= 0 %}trend-up{% else %}trend-down{% endif %}">
+                    {% if metrics.retorno_total_pct >= 0 %}▲{% else %}▼{% endif %}
+                </span>
             </div>
-            <!-- Ícone decorativo -->
-            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 50%;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            </div>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 5px;">
+                Total ganho sobre o capital investido.
+            </p>
         </div>
 
-        <!-- Tabela de Ativos -->
-        {% if investimentos %}
-            <div class="table-container">
-                <table class="invest-table">
-                    <thead>
-                        <tr>
-                            <th>Tipo</th>
-                            <th>Data Aplicação</th>
-                            <th>Valor Aplicado</th>
-                            <th>Rentabilidade</th>
-                            <th style="text-align: right;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in investimentos %}
-                        <tr>
-                            <td>
-                                <!-- Badge Dinâmica -->
-                                <span class="badge badge-{{ item.tipo_investimento }}">
-                                    {% if item.tipo_investimento == 'RENDA_FIXA' %}Renda Fixa
-                                    {% elif item.tipo_investimento == 'ACOES' %}Ações
-                                    {% elif item.tipo_investimento == 'FUNDOS' %}Fundos
-                                    {% elif item.tipo_investimento == 'CRIPTO' %}Cripto
-                                    {% else %}{{ item.tipo_investimento }}{% endif %}
-                                </span>
-                            </td>
-                            <td>{{ item.data_aplicacao|slice:":10" }}</td> <!-- Formata data simples -->
-                            <td style="font-weight: 600;">R$ {{ item.valor_investido|floatformat:2 }}</td>
-                            <td style="color: var(--success-color);">
-                                <!-- Exemplo visual: Se rentabilidade > 0 mostra seta -->
-                                {% if item.rentabilidade > 0 %}
-                                    ▲ R$ {{ item.rentabilidade|floatformat:2 }}
-                                {% else %}
-                                    R$ 0,00
-                                {% endif %}
-                            </td>
-                            <td style="text-align: right;">
-                                {% if item.ativo %}
-                                    <form method="post" data-no-loader action="{% url 'resgatar_investimento_page' item.id %}" onsubmit="return confirmarResgate(this);" style="display: inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn-redeem">Resgatar</button>
-                                    </form>
-                                {% else %}
-                                    <span style="color: var(--text-light); font-size: 0.85rem;">Resgatado</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <!-- Retorno Anualizado (CAGR) -->
+        <div class="metric-card">
+            <div class="metric-title">Retorno Anualizado (CAGR)</div>
+            <div class="metric-value" style="color: var(--invest-color);">
+                {{ metrics.retorno_anualizado_pct|floatformat:2 }}%
             </div>
-        {% else %}
-            <!-- Empty State -->
-            <div style="text-align: center; padding: 3rem; color: var(--text-light);">
-                <p>Você ainda não realizou nenhum investimento.</p>
-                <a href="{% url 'realizar_investimento_page' %}" style="color: var(--invest-color); font-weight: 600;">Começar agora</a>
-            </div>
-        {% endif %}
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 5px;">
+                Projeção de crescimento composto anual.
+            </p>
+        </div>
 
+        <!-- Volatilidade (Risco) -->
+        <div class="metric-card">
+            <div class="metric-title">Volatilidade (Risco)</div>
+            <div class="metric-value">
+                {{ metrics.volatilidade_pct|floatformat:2 }}%
+                <span class="trend-pill risk-pill">
+                    ⚡
+                </span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 5px;">
+                Desvio padrão dos retornos da carteira.
+            </p>
+        </div>
+    </div>
+
+    <div class="analytics-chart-container">
+        
+        <!-- Header com Controles de Tempo -->
+        <div class="chart-controls">
+            <div class="chart-title-group">
+                <h3>Performance Comparativa</h3>
+                <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 4px;">
+                    <span style="display:inline-block; width: 8px; height: 8px; background: #7c3aed; border-radius: 50%; margin-right: 4px;"></span> Carteira
+                    <span style="display:inline-block; width: 8px; height: 8px; background: #94a3b8; border-radius: 50%; margin-right: 4px; margin-left: 8px;"></span> Benchmark
+                </div>
+            </div>
+
+            <!-- Botões de Tempo -->
+            <div class="time-selector">
+                <!-- A lógica 'active' será aplicada via JS ou Backend se passar no contexto -->
+                <button class="time-btn" onclick="alterarPeriodo('1mo')">1M</button>
+                <button class="time-btn" onclick="alterarPeriodo('3mo')">3M</button>
+                <button class="time-btn" onclick="alterarPeriodo('6mo')">6M</button>
+                <button class="time-btn" onclick="alterarPeriodo('1y')">1A</button>
+                <button class="time-btn" onclick="alterarPeriodo('2y')">2A</button>
+                <button class="time-btn" onclick="alterarPeriodo('max')">Tudo</button>
+            </div>
+        </div>
+        
+        <!-- Onde o ApexCharts vai desenhar -->
+        <div id="portfolioChart" style="min-height: 350px;"></div>
+    </div>
+
+    {% elif analytics_error %}
+        <div class="alert alert-warning" style="background: #fffbeb; color: #b45309; border: 1px solid #fcd34d;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 5px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            {{ analytics_error }}
+        </div>
     {% endif %}
-</div>
-<script>
-function confirmarResgate(form) {
-    const swalWithBootstrapButtons = Swal.mixin({
-        customClass: {
-            confirmButton: "btn btn-success",
-            cancelButton: "btn btn-danger"
-        },
-        buttonsStyling: false
-    });
 
-    swalWithBootstrapButtons.fire({
-        title: "Tem certeza?",
-        text: "Essa ação não poderá ser desfeita!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Sim, resgatar",
-        cancelButtonText: "Cancelar",
-        reverseButtons: true
-    }).then((result) => {
-        if (result.isConfirmed) {
-            window.showLoader();
-            form.submit();
+
+    <!-- 3. Tabela Detalhada de Ativos -->
+    {% if investimentos %}
+        <h3 class="section-title">Detalhamento de Custódia</h3>
+        <div class="table-container">
+            <table class="invest-table">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Ativo</th>
+                        <th>Categoria</th>
+                        <th>Qtd.</th>
+                        <th>Preço Médio</th>
+                        <th>Total Investido</th>
+                        <th style="text-align: right;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in investimentos %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; flex-direction: column;">
+                                <span style="font-weight: 700; color: var(--primary-color);">
+                                    {% if item.ticker %}{{ item.ticker }}{% else %}RENDA FIXA{% endif %}
+                                </span>
+                                <small style="color: var(--text-light); font-size: 0.75rem;">ID: {{ item.id|slice:":8" }}...</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ item.tipo_investimento }}">
+                                {% if item.tipo_investimento == 'RENDA_FIXA' %}Renda Fixa
+                                {% elif item.tipo_investimento == 'ACOES' %}Ações
+                                {% elif item.tipo_investimento == 'FUNDOS' %}Fundos
+                                {% elif item.tipo_investimento == 'CRIPTO' %}Cripto
+                                {% else %}{{ item.tipo_investimento }}{% endif %}
+                            </span>
+                        </td>
+                        {% if item.tipo_investimento == "RENDA_FIXA" %}
+                        <td style="font-family: monospace;">{{ item.quantidade|default:"-"|floatformat:2 }}</td>
+                        {% else %}
+                        <td style="font-family: monospace;">{{ item.quantidade|default:"-" }}</td>
+                        {% endif %}
+
+                        
+                        <td style="font-family: monospace;">
+                            {% if item.preco_medio %}R$ {{ item.preco_medio|floatformat:2 }}{% else %}-{% endif %}
+                        </td>
+                        <td style="font-weight: 700; color: var(--text-main);">
+                            R$ {{ item.valor_investido|floatformat:2 }}
+                        </td>
+                        <td style="text-align: right;">
+                            {% if item.ativo %}
+                                <form method="post" data-no-loader action="{% url 'resgatar_investimento_page' item.id %}" onsubmit="return confirmarResgate(event, this);" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-redeem" title="Resgatar Valor">
+                                        Resgatar
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span style="color: var(--text-light); font-size: 0.8rem; font-style: italic;">Resgatado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 3rem; background: #fff; border-radius: 12px; border: 1px solid var(--border-color);">
+            <p style="color: var(--text-light); margin-bottom: 1rem;">Você ainda não possui investimentos ativos.</p>
+            <a href="{% url 'realizar_investimento_page' %}" class="btn btn-primary btn-invest">Começar a Investir</a>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- DEPENDÊNCIAS JAVASCRIPT -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script>
+    // --- 1. Lógica do SweetAlert2 (Resgate) ---
+    function confirmarResgate(e, form) {
+        e.preventDefault(); // Impede o envio imediato
+
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success",
+                cancelButton: "btn btn-danger"
+            },
+            buttonsStyling: true
+        });
+
+        swalWithBootstrapButtons.fire({
+            title: "Confirmar Resgate?",
+            text: "O valor será creditado na sua conta corrente e o ativo sairá da custódia.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, resgatar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true,
+            focusCancel: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Feedback visual de carregamento
+                Swal.fire({
+                    title: 'Processando...',
+                    text: 'Aguarde enquanto comunicamos com a bolsa.',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading() }
+                });
+                form.submit();
+            }
+        });
+        return false;
+    }
+
+    // --- 2. Lógica do Gráfico (ApexCharts) ---
+    // --- 2. Lógica do Gráfico (ApexCharts) ---
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Função para os botões de tempo
+        window.alterarPeriodo = function(periodo) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('periodo', periodo);
+            window.location.href = url.toString(); // Recarrega a página com novo filtro
+        }
+
+        // Marca o botão ativo baseado na URL atual
+        const params = new URLSearchParams(window.location.search);
+        const currentPeriod = params.get('periodo') || '1y'; // Padrão 1y
+        const btnActive = document.querySelector(`.time-btn[onclick*="'${currentPeriod}'"]`);
+        if(btnActive) btnActive.classList.add('active');
+
+
+        // Recupera dados
+        const rawData = '{{ chart_data|default:"{}"|safe }}';
+        let chartData = {};
+        
+        try {
+            chartData = JSON.parse(rawData);
+        } catch (e) {
+            console.error("Erro JSON", e);
+        }
+
+        if (chartData && chartData.labels && chartData.labels.length > 0) {
+            
+            // TRUQUE PARA LIMPAR O EIXO X:
+            // O ApexCharts funciona melhor com datas se passarmos pares [Timestamp, Valor]
+            // Em vez de arrays separados. Vamos converter:
+            
+            const portfolioSeries = [];
+            const benchmarkSeries = [];
+
+            chartData.labels.forEach((dateStr, index) => {
+                // Converte string '2024-01-01' para Timestamp JS (milissegundos)
+                const dateObj = new Date(dateStr).getTime();
+                
+                portfolioSeries.push([dateObj, chartData.portfolio[index]]);
+                benchmarkSeries.push([dateObj, chartData.benchmark[index]]);
+            });
+
+            const options = {
+                series: [
+                    { name: 'Minha Carteira', data: portfolioSeries },
+                    { name: 'Benchmark', data: benchmarkSeries }
+                ],
+                chart: {
+                    type: 'area',
+                    height: 350,
+                    toolbar: { show: false }, // Esconde toolbar padrão feia
+                    fontFamily: 'Inter, sans-serif',
+                    animations: { enabled: true }
+                },
+                colors: ['#7c3aed', '#cbd5e1'], 
+                stroke: {
+                    curve: 'smooth',
+                    width: [2, 2],
+                    dashArray: [0, 0]
+                },
+                fill: {
+                    type: ['gradient', 'solid'],
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.5,
+                        opacityTo: 0.05,
+                        stops: [0, 100]
+                    },
+                    solid: { opacity: 0.1 } // Benchmark com fundo sólido leve
+                },
+                dataLabels: { enabled: false },
+                
+                // CONFIGURAÇÃO DO EIXO X (DATA) - AQUI ESTÁ A CORREÇÃO VISUAL
+                xaxis: {
+                    type: 'datetime', // Isso diz ao gráfico: "Trate X como tempo"
+                    tooltip: { enabled: false },
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    labels: {
+                        datetimeFormatter: {
+                            year: 'yyyy',
+                            month: 'MMM \`yy',
+                            day: 'dd MMM'
+                        },
+                        style: { colors: '#94a3b8', fontSize: '12px' }
+                    }
+                },
+                
+                yaxis: {
+                    labels: {
+                        formatter: (val) => { return val.toFixed(0) + "%" },
+                        style: { colors: '#94a3b8' }
+                    },
+                    opposite: false // Deixa o eixo Y na esquerda (padrão ocidental)
+                },
+                
+                // Tooltip Customizado (Quando passa o mouse)
+                tooltip: {
+                    theme: 'light',
+                    x: { format: 'dd MMM yyyy' }, // Formato da data no hover
+                    y: {
+                        formatter: function (val) {
+                            return val.toFixed(2) + "%";
+                        }
+                    }
+                },
+                grid: {
+                    borderColor: '#f1f5f9',
+                    strokeDashArray: 4,
+                    xaxis: { lines: { show: false } } // Remove linhas verticais para limpar
+                },
+                legend: { show: false } 
+            };
+
+            const chart = new ApexCharts(document.querySelector("#portfolioChart"), options);
+            chart.render();
+        } else {
+            document.querySelector("#portfolioChart").innerHTML = `
+                <div style="text-align:center; padding: 4rem; color: #94a3b8;">
+                    <p>Dados insuficientes para o período selecionado.</p>
+                </div>
+            `;
         }
     });
-
-    return false;
-}
 </script>
 {% endblock content %}

@@ -10,6 +10,7 @@ from django.shortcuts import redirect
 from banco.forms import CriarPerfilInvestidorForm
 from banco.forms import RealizarInvestimentoForm, AtualizarPerfilInvestidorForm
 from django.http import Http404
+import json
 
 
 class MarketDataAjaxView(View):
@@ -170,29 +171,62 @@ class ListarInvestimentosFrontEnd(TemplateView):
         headers = {'Authorization': f'Token {token}'}
 
         cliente_id = get_cliente_investidor_id(self.request)
-        
         if not cliente_id:
-            context['error'] = "Perfil de investidor não encontrado."
+            context['error'] = "Perfil não encontrado."
             return context
-        
+
         base = settings.API_BASE_URL
-        url = f"{base}/internal/investimentos/cliente/{cliente_id}/"
+        url_lista = f"{base}/internal/investimentos/cliente/{cliente_id}/"
 
         try:
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                investimentos = response.json()
+            resp_lista = requests.get(url_lista, headers=headers)
+            if resp_lista.status_code == 200:
+                investimentos = resp_lista.json()
                 context['investimentos'] = investimentos
-                
-                total = sum(float(item['valor_investido']) 
-                            for item in investimentos if item['ativo'])
-                context['total_investido'] = total
-            else:
-                context['error'] = "Não foi possível carregar os " \
-                                   "investimentos."
-        except requests.RequestException:
-            context['error'] = "Erro de conexão com o servidor."
+                context['total_investido'] = sum(float(i['valor_investido']) 
+                                                 for i in investimentos if 
+                                                 i.get('ativo'))
+        except Exception:
+            context['error'] = "Erro ao buscar investimentos."
 
+        url_analytics = f"{base}/internal/analytics/cliente/{cliente_id}/"
+
+        periodo_selecionado = self.request.GET.get('periodo', '1y')
+        
+        validos = ['1mo', '3mo', '6mo', '1y', '2y', '5y', 'max']
+        if periodo_selecionado not in validos:
+            periodo_selecionado = '1y'
+
+        try:
+            resp_analytics = requests.get(url_analytics, headers=headers, 
+                                          params={
+                                              'periodo': periodo_selecionado})
+            
+            if resp_analytics.status_code == 200:
+                dados_analytics = resp_analytics.json()
+                
+                context['metrics'] = dados_analytics.get('metricas', {})
+                
+                historico = dados_analytics.get('historico', {})
+                if historico and len(historico.get('datas', [])) > 1:
+                    chart_data_js_friendly = {
+                        "labels": historico.get('datas', []),
+                        "portfolio": historico.get('carteira_pct', []),
+                        "benchmark": historico.get('benchmark_pct', [])
+                    }
+
+                    chart_data_real = chart_data_js_friendly
+                    context['chart_data'] = json.dumps(chart_data_real)
+                    print("Entrou - Dados Formatados para JS")
+                
+            elif resp_analytics.status_code == 404:
+                context['analytics_error'] = "Dados de análise ainda não "
+                "disponíveis."
+        
+        except requests.RequestException:
+            pass
+        
+        context['periodo_atual'] = periodo_selecionado
         return context
 
 
