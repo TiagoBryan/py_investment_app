@@ -6,7 +6,6 @@
 <div class="auth-container">
     
     <div class="text-center">
-        <!-- Ícone de Engrenagem/Ajuste (Roxo) -->
         <svg class="status-icon" style="color: var(--invest-color);" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
 
         <h1 class="page-title">Gerenciar Perfil</h1>
@@ -14,7 +13,6 @@
             Ajuste sua estratégia de rentabilidade.
         </p>
     </div>
-    <!-- BLOCO DE MENSAGENS (Aqui aparecerá o erro da exclusão) -->
     {% if messages %}
         {% for message in messages %}
             <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}" role="alert">
@@ -23,7 +21,6 @@
         {% endfor %}
     {% endif %}
 
-    <!-- Info Box: Lembrete das taxas -->
     <div class="info-box">
         <h4>Lembrete de Rentabilidade</h4>
         <ul style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
@@ -44,7 +41,6 @@
             <label for="{{ form.perfil_investidor.id_for_label }}" class="form-label">
                 {{ form.perfil_investidor.label }}
             </label>
-            <!-- A classe form-input deve vir do seu forms.py, senão adicione manualmente aqui -->
             {{ form.perfil_investidor }}
             
             {% if form.perfil_investidor.errors %}
@@ -60,7 +56,6 @@
         </div>
     </form>
 
-    <!-- Zona de Perigo -->
     <div class="danger-zone">
         <div class="danger-box">
             <h3 class="danger-title">Encerrar Carreira de Investidor</h3>

@@ -5,7 +5,6 @@
 {% block content %}
 <div class="auth-container">
     <div class="text-center">
-        <!-- Ícone Depósito (Seta para baixo/Entrada) -->
         <svg class="status-icon success" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <polyline points="19 12 12 19 5 12"></polyline>
@@ -26,7 +25,6 @@
             </div>
         {% endif %}
 
-        <!-- Loop inteligente para renderizar os campos do form com nosso estilo -->
         {% for field in form %}
             <div class="form-group">
                 <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
@@ -62,7 +60,6 @@
 </div>
 
 <script>
-    // Validação Front-end para impedir valores negativos
     document.getElementById('depositoForm').addEventListener('submit', function(e) {
         const inputs = this.querySelectorAll('input[type="number"]');
         let isValid = true;

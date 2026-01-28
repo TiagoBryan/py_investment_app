@@ -1,7 +1,7 @@
 {% extends "global/base.html" %}
 
 {% block content %}
-<div class="dashboard-container" style="max-width: 800px;"> <!-- Container um pouco menor para focar -->
+<div class="dashboard-container" style="max-width: 800px;">
     
     <div class="text-center" style="margin-bottom: 2rem;">
         <h1 class="page-title" style="margin-bottom: 0.5rem;">Análise de Crédito</h1>
@@ -10,7 +10,6 @@
 
     <div class="stats-grid">
         
-        <!-- Cartão de Saldo -->
         <div class="stat-card">
             <div class="stat-label">Saldo em Conta</div>
             <div class="stat-value">
@@ -24,10 +23,8 @@
             </div>
         </div>
 
-        <!-- Cartão de Score -->
         <div class="stat-card">
             <div class="stat-label">Meu Score</div>
-            <!-- ID para o JS colorir -->
             <div class="stat-value" id="scoreValue">
                 {{ score|floatformat:2 }}
             </div>
@@ -47,11 +44,9 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Lógica para colorir o Score
         const scoreElement = document.getElementById('scoreValue');
         const textElement = document.getElementById('scoreText');
         
-        // Converte o texto do django template em número (remove pontos se houver)
         const score = parseInt(scoreElement.innerText.replace(/\D/g, '')) || 0;
 
         if (score >= 700) {

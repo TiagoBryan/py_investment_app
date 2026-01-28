@@ -21,7 +21,7 @@ class UsersMeChangeFrontEnd(FormView):
 
     def get_initial(self):
         """
-        Preenche os campos do formulário com os dados atuais da API.
+        preenche os campos do formulário com os dados atuais da API.
         """
         initial = super().get_initial()
         

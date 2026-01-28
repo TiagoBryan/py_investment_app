@@ -5,7 +5,6 @@
 {% block content %}
 <div class="auth-container">
     <div class="text-center">
-        <!-- Ícone de Perigo (User X) -->
         <svg class="status-icon error" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--error-color);"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="18" y1="8" x2="23" y2="13"></line><line x1="23" y1="8" x2="18" y2="13"></line></svg>
         
         <h1 class="page-title">Excluir Meu Acesso</h1>
@@ -14,7 +13,6 @@
         </p>
     </div>
 
-    <!-- Aviso de Impacto -->
     <div class="alert alert-error">
         <strong>Atenção:</strong> Ao confirmar esta ação:
         <ul style="margin-top: 5px; margin-left: 20px; list-style-type: disc;">
@@ -27,7 +25,6 @@
     <form method="post" action="{% url 'user_deactivate_page' %}" novalidate>
         {% csrf_token %}
 
-        <!-- Erros gerais (ex: Saldo não zerado retornado pela API) -->
         {% if form.non_field_errors %}
             <div class="alert alert-error">
                 {{ form.non_field_errors.as_text }}

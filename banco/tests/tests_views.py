@@ -10,7 +10,7 @@ class FrontendViewsTest(TestCase):
         session['auth_token'] = 'fake-token-123'
         session.save()
 
-    # --- TESTE DE LOGIN (POST) ---
+    # --- teste de login com post ---
     @patch('banco.views.login_front_end.requests.post')
     @patch('banco.views.login_front_end.requests.get')
     def test_login_sucesso(self, mock_get, mock_post):
@@ -32,7 +32,7 @@ class FrontendViewsTest(TestCase):
 
     @patch('banco.views.login_front_end.requests.post')
     def test_login_api_fora_do_ar(self, mock_post):
-        """Se a API estiver offline, deve exibir erro tratado"""
+        """Se a API estiver offline deve exibir erro tratado"""
         from requests import RequestException
 
         mock_post.side_effect = RequestException("Conexão recusada")
@@ -44,10 +44,9 @@ class FrontendViewsTest(TestCase):
         response = self.client.post(url, data)
 
         self.assertEqual(response.status_code, 200)
-        # Verifica se renderizou o template com o erro
         self.assertContains(response, "Erro de conexão com o servidor")
 
-    # --- TESTE DE DEPÓSITO (POST) ---
+    # --- teste de deposito com post ---
     @patch('banco.views.movimentacao_front_end.requests.post')
     def test_deposito_sucesso(self, mock_post):
         mock_post.return_value.status_code = 200
@@ -66,7 +65,7 @@ class FrontendViewsTest(TestCase):
         self.assertRedirects(response, reverse('home_page'))
         self.assertTrue(mock_post.called)
 
-    # --- TESTE DE SAQUE (GET CONTEXTO) ---
+    # --- teste de saque ---
     @patch('banco.views.movimentacao_front_end.requests.get')
     def test_saque_exibe_saldo(self, mock_get):
         mock_get.return_value.status_code = 200
@@ -83,12 +82,10 @@ class FrontendViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['saldo'], 500.00)
 
-    # --- TESTE DE CADASTRO (ERRO DA API) ---
+    # --- teste de cadastro com erro da api ---
     @patch('banco.views.signup_front_end.requests.post')
     def test_signup_erro_email_duplicado(self, mock_post):
-        # Simula API retornando 400 Bad Request
         mock_post.return_value.status_code = 400
-        # Simula o JSON que o DRF/Authemail retorna
         mock_post.return_value.text = '{"detail": "Email já cadastrado"}'
         mock_post.return_value.json\
             .return_value = {'detail': 'Email já cadastrado'}
@@ -102,7 +99,6 @@ class FrontendViewsTest(TestCase):
 
         response = self.client.post(url, data)
 
-        # Não redireciona, volta para o form com erro (Status 200)
         self.assertEqual(response.status_code, 200)
 
         form = response.context['form']

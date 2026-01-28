@@ -56,7 +56,7 @@ class EmailChangeEmailsSentFrontEnd(TemplateView):
 
 class EmailChangeVerifyFrontEnd(View):
     """
-    Recebe o clique do link do e-mail: /email/change/verify/?code=XYZ
+    recebe o clique do link do e-mail: /email/change/verify/?code=XYZ
     """
     def get(self, request, format=None):
         code = request.GET.get('code', '')

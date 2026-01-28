@@ -4,7 +4,7 @@
     {% include "global/partials/_head.html" %}
 </head>
 <body>
-    <!-- LOADER GLOBAL -->
+    <!-- loader global -->
     <div id="global-loader">
         <div class="spinner"></div>
         <div class="loader-text">Processando...</div>
@@ -15,39 +15,29 @@
     <main class="content">
         {% block content %}{% endblock content %}
     </main>
-    <!-- SCRIPT LOADER GLOBAL -->
+    <!-- scripy loader global -->
     <script>
     document.addEventListener("DOMContentLoaded", function() {
         const loader = document.getElementById('global-loader');
         const forms = document.querySelectorAll('form');
 
-        // Função para ativar o loader manualmente (útil para SweetAlert)
         window.showLoader = function() {
             loader.style.display = 'flex';
         };
 
-        // Função para esconder (caso precise via JS, embora o reload da página resolva)
         window.hideLoader = function() {
             loader.style.display = 'none';
         };
 
         forms.forEach(form => {
             form.addEventListener('submit', function(e) {
-                // Verifica se o formulário é válido (campos required preenchidos, email certo, etc)
                 if (!form.checkValidity()) {
-                    // Se estiver inválido, o navegador vai mostrar os balões de erro.
-                    // NÃO mostramos o loader para não travar a tela.
                     return;
                 }
 
-                // Se o formulário tiver o atributo 'data-no-loader', ignoramos
                 if (form.hasAttribute('data-no-loader')) return;
-
-                // Mostra o loader
                 showLoader();
 
-                // Opcional: Desabilitar o botão de submit para evitar duplo clique
-                // (O loader em tela cheia já previne, mas isso é uma garantia extra)
                 const btn = form.querySelector('button[type="submit"]');
                 if (btn) {
                     btn.disabled = true;
@@ -57,12 +47,9 @@
         });
     });
 
-    // Tratamento para quando o usuário clica em "Voltar" do navegador
-    // (Às vezes o loader fica travado na tela ao voltar)
     window.addEventListener("pageshow", function(event) {
         if (event.persisted) {
             window.hideLoader();
-            // Reabilita botões
             const btns = document.querySelectorAll('button[type="submit"]');
             btns.forEach(btn => btn.disabled = false);
         }

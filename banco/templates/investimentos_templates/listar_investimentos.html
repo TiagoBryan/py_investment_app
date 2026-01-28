@@ -1,15 +1,13 @@
 {% extends "global/base.html" %}
 {% block header %}
     {% include "global/partials/_header.html" %}
-    <!-- SweetAlert2 para o modal de confirmação bonito -->
     <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock header %}
 
 {% block content %}
 <div class="dashboard-container">
-    
-    <!-- Cabeçalho com Ações -->
+
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div>
             <h1 class="page-title" style="margin-bottom: 0.2rem; text-align: left;">Minha Carteira</h1>
@@ -24,7 +22,6 @@
         </div>
     </div>
 
-    <!-- MENSAGENS DO SISTEMA -->
     {% if messages %}
         {% for message in messages %}
             <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}" style="margin-bottom: 2rem;">
@@ -37,21 +34,15 @@
         <div class="alert alert-error">{{ error }}</div>
     {% endif %}
 
-    <!-- ========================================== -->
-    <!-- DASHBOARD ANALÍTICO                        -->
-    <!-- ========================================== -->
     {% if metrics %}
     
-    <!-- 1. KPIs (Cards de Métricas) -->
     <div class="metrics-grid">
         
-        <!-- Retorno Total Acumulado -->
         <div class="metric-card">
             <div class="metric-title">Rentabilidade Acumulada</div>
             <div class="metric-value" style="color: {% if metrics.retorno_total_pct >= 0 %}var(--success-color){% else %}var(--error-color){% endif %};">
                 {{ metrics.retorno_total_pct|floatformat:2 }}%
                 
-                <!-- Badge visual -->
                 <span class="trend-pill {% if metrics.retorno_total_pct >= 0 %}trend-up{% else %}trend-down{% endif %}">
                     {% if metrics.retorno_total_pct >= 0 %}▲{% else %}▼{% endif %}
                 </span>
@@ -61,7 +52,6 @@
             </p>
         </div>
 
-        <!-- Retorno Anualizado (CAGR) -->
         <div class="metric-card">
             <div class="metric-title">Retorno Anualizado (CAGR)</div>
             <div class="metric-value" style="color: var(--invest-color);">
@@ -72,7 +62,6 @@
             </p>
         </div>
 
-        <!-- Volatilidade (Risco) -->
         <div class="metric-card">
             <div class="metric-title">Volatilidade (Risco)</div>
             <div class="metric-value">
@@ -89,7 +78,6 @@
 
     <div class="analytics-chart-container">
         
-        <!-- Header com Controles de Tempo -->
         <div class="chart-controls">
             <div class="chart-title-group">
                 <h3>Performance Comparativa</h3>
@@ -99,9 +87,7 @@
                 </div>
             </div>
 
-            <!-- Botões de Tempo -->
             <div class="time-selector">
-                <!-- A lógica 'active' será aplicada via JS ou Backend se passar no contexto -->
                 <button class="time-btn" onclick="alterarPeriodo('1mo')">1M</button>
                 <button class="time-btn" onclick="alterarPeriodo('3mo')">3M</button>
                 <button class="time-btn" onclick="alterarPeriodo('6mo')">6M</button>
@@ -111,7 +97,6 @@
             </div>
         </div>
         
-        <!-- Onde o ApexCharts vai desenhar -->
         <div id="portfolioChart" style="min-height: 350px;"></div>
     </div>
 
@@ -123,7 +108,6 @@
     {% endif %}
 
 
-    <!-- 3. Tabela Detalhada de Ativos -->
     {% if investimentos %}
         <h3 class="section-title">Detalhamento de Custódia</h3>
         <div class="table-container">
@@ -197,13 +181,11 @@
 
 </div>
 
-<!-- DEPENDÊNCIAS JAVASCRIPT -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 <script>
-    // --- 1. Lógica do SweetAlert2 (Resgate) ---
     function confirmarResgate(e, form) {
-        e.preventDefault(); // Impede o envio imediato
+        e.preventDefault();
 
         const swalWithBootstrapButtons = Swal.mixin({
             customClass: {
@@ -224,7 +206,6 @@
             focusCancel: true
         }).then((result) => {
             if (result.isConfirmed) {
-                // Feedback visual de carregamento
                 Swal.fire({
                     title: 'Processando...',
                     text: 'Aguarde enquanto comunicamos com a bolsa.',
@@ -237,25 +218,19 @@
         return false;
     }
 
-    // --- 2. Lógica do Gráfico (ApexCharts) ---
-    // --- 2. Lógica do Gráfico (ApexCharts) ---
     document.addEventListener('DOMContentLoaded', function() {
         
-        // Função para os botões de tempo
         window.alterarPeriodo = function(periodo) {
             const url = new URL(window.location.href);
             url.searchParams.set('periodo', periodo);
-            window.location.href = url.toString(); // Recarrega a página com novo filtro
+            window.location.href = url.toString();
         }
 
-        // Marca o botão ativo baseado na URL atual
         const params = new URLSearchParams(window.location.search);
-        const currentPeriod = params.get('periodo') || '1y'; // Padrão 1y
+        const currentPeriod = params.get('periodo') || '1y';
         const btnActive = document.querySelector(`.time-btn[onclick*="'${currentPeriod}'"]`);
         if(btnActive) btnActive.classList.add('active');
 
-
-        // Recupera dados
         const rawData = '{{ chart_data|default:"{}"|safe }}';
         let chartData = {};
         
@@ -267,15 +242,10 @@
 
         if (chartData && chartData.labels && chartData.labels.length > 0) {
             
-            // TRUQUE PARA LIMPAR O EIXO X:
-            // O ApexCharts funciona melhor com datas se passarmos pares [Timestamp, Valor]
-            // Em vez de arrays separados. Vamos converter:
-            
             const portfolioSeries = [];
             const benchmarkSeries = [];
 
             chartData.labels.forEach((dateStr, index) => {
-                // Converte string '2024-01-01' para Timestamp JS (milissegundos)
                 const dateObj = new Date(dateStr).getTime();
                 
                 portfolioSeries.push([dateObj, chartData.portfolio[index]]);
@@ -290,7 +260,7 @@
                 chart: {
                     type: 'area',
                     height: 350,
-                    toolbar: { show: false }, // Esconde toolbar padrão feia
+                    toolbar: { show: false },
                     fontFamily: 'Inter, sans-serif',
                     animations: { enabled: true }
                 },
@@ -308,13 +278,12 @@
                         opacityTo: 0.05,
                         stops: [0, 100]
                     },
-                    solid: { opacity: 0.1 } // Benchmark com fundo sólido leve
+                    solid: { opacity: 0.1 }
                 },
                 dataLabels: { enabled: false },
                 
-                // CONFIGURAÇÃO DO EIXO X (DATA) - AQUI ESTÁ A CORREÇÃO VISUAL
                 xaxis: {
-                    type: 'datetime', // Isso diz ao gráfico: "Trate X como tempo"
+                    type: 'datetime',
                     tooltip: { enabled: false },
                     axisBorder: { show: false },
                     axisTicks: { show: false },
@@ -333,13 +302,12 @@
                         formatter: (val) => { return val.toFixed(0) + "%" },
                         style: { colors: '#94a3b8' }
                     },
-                    opposite: false // Deixa o eixo Y na esquerda (padrão ocidental)
+                    opposite: false
                 },
                 
-                // Tooltip Customizado (Quando passa o mouse)
                 tooltip: {
                     theme: 'light',
-                    x: { format: 'dd MMM yyyy' }, // Formato da data no hover
+                    x: { format: 'dd MMM yyyy' },
                     y: {
                         formatter: function (val) {
                             return val.toFixed(2) + "%";
@@ -349,7 +317,7 @@
                 grid: {
                     borderColor: '#f1f5f9',
                     strokeDashArray: 4,
-                    xaxis: { lines: { show: false } } // Remove linhas verticais para limpar
+                    xaxis: { lines: { show: false } }
                 },
                 legend: { show: false } 
             };

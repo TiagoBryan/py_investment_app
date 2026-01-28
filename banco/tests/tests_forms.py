@@ -39,7 +39,7 @@ class FrontendFormsTest(TestCase):
             'tipo_pessoa': 'F',
             'cpf_cnpj': '111.222.333-44',
             'password': 'senha369',
-            'confirm_password': 'senha456'  # Diferente
+            'confirm_password': 'senha456'
         })
         self.assertFalse(form.is_valid())
         self.assertIn('confirm_password', form.errors)

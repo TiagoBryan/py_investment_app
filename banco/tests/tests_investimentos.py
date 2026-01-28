@@ -65,7 +65,7 @@ class InvestimentosFrontendTest(TestCase):
 
         self.assertEqual(response.context['projecao'], 540.00)
 
-    # --- teste crira investimento (Formulário Novo) ---
+    # --- teste crira investimento ---
     @patch('banco.views.investimentos_front_end.requests.post')
     @patch('banco.views.investimentos_front_end.get_cliente_investidor_id')
     def test_realizar_investimento_sucesso(self, mock_get_id, mock_post):
@@ -126,12 +126,12 @@ class InvestimentosFrontendTest(TestCase):
         
         self.assertEqual(response.context['conta']['saldo'], 50.00)
 
-    # --- teste desativar perfil (Com bloqueio) ---
+    # --- teste desativar perfil ---
     @patch('banco.views.investimentos_front_end.requests.delete')
     @patch('banco.views.investimentos_front_end.get_cliente_investidor_id')
     def test_desativar_perfil_bloqueado(self, mock_get_id, mock_delete):
         """
-        Teste da funcionalidade que redireciona de volta para a edição
+        teste da funcionalidade que redireciona de volta para a edição
         se houver erro na exclusão.
         """
         mock_get_id.return_value = 'uid-1'

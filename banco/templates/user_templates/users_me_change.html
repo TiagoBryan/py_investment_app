@@ -14,16 +14,13 @@
     <form method="post" action="{% url 'users_me_change_page' %}" id="profileForm" novalidate>
         {% csrf_token %}
 
-        <!-- Erros do Django -->
         {% if form.non_field_errors %}
             <div class="alert alert-error">
                 {{ form.non_field_errors.as_text }}
             </div>
         {% endif %}
 
-        <!-- Grid de Nome e Sobrenome -->
         <div class="form-row">
-            <!-- Primeiro Nome -->
             <div class="form-group">
                 <label for="id_first_name" class="form-label">Nome</label>
                 <input 
@@ -41,7 +38,6 @@
                 {% endif %}
             </div>
 
-            <!-- Sobrenome -->
             <div class="form-group">
                 <label for="id_last_name" class="form-label">Sobrenome</label>
                 <input 
@@ -75,7 +71,6 @@
         form.addEventListener('submit', function(e) {
             let isValid = true;
             
-            // Função auxiliar de validação
             const validateField = (id, errorId) => {
                 const input = document.getElementById(id);
                 const errorDiv = document.getElementById(errorId);
@@ -90,8 +85,6 @@
                     return true;
                 }
             };
-
-            // Validar os dois campos
             const validName = validateField('id_first_name', 'error_first_name');
             const validLast = validateField('id_last_name', 'error_last_name');
 
@@ -99,12 +92,9 @@
                 e.preventDefault();
             }
         });
-
-        // Limpar erro ao digitar
         ['id_first_name', 'id_last_name'].forEach(id => {
             document.getElementById(id).addEventListener('input', function() {
                 this.style.borderColor = 'var(--border-color)';
-                // Oculta a msg de erro associada (logica simples baseada no ID)
                 const errorId = id === 'id_first_name' ? 'error_first_name' : 'error_last_name';
                 document.getElementById(errorId).style.display = 'none';
             });

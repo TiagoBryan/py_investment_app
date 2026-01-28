@@ -1,5 +1,3 @@
-# banco/tests/tests_investimentos_forms.py
-
 from django.test import TestCase, Client
 from django.urls import reverse
 from unittest.mock import patch
@@ -8,7 +6,7 @@ from banco.forms import RealizarInvestimentoForm
 
 class InvestimentoFormTest(TestCase):
     def test_validacao_renda_variavel(self):
-        """Se for Ações, Ticker e Quantidade são obrigatórios, Valor R$ não"""
+        """acoes, ticker e quantidade sao obrigatorios, valor não"""
         form = RealizarInvestimentoForm(data={
             'tipo_investimento': 'ACOES',
             'ticker': 'PETR4',
@@ -26,7 +24,7 @@ class InvestimentoFormTest(TestCase):
         self.assertIn('ticker', form_err.errors)
 
     def test_validacao_renda_fixa(self):
-        """Se for Renda Fixa, Valor R$ é obrigatório, Ticker não"""
+        """renda fixa o valor é obrigatório, ticker não"""
         form = RealizarInvestimentoForm(data={
             'tipo_investimento': 'RENDA_FIXA',
             'valor_investido': '1000.00',
@@ -59,8 +57,7 @@ class InvestimentoViewTest(TestCase):
     @patch('banco.views.investimentos_front_end.requests.post')
     def test_envio_payload_acoes(self, mock_post, mock_get_id):
         """
-        Verifica se a View monta o JSON correto para Ações 
-        (Envia Ticker/Qtd, ignora valor)
+        Verifica se a View monta o JSON correto para acoes 
         """
         mock_get_id.return_value = 'uid-123'
         mock_post.return_value.status_code = 201
@@ -88,7 +85,7 @@ class InvestimentoViewTest(TestCase):
 
     @patch('banco.views.investimentos_front_end.requests.get')
     def test_ajax_proxy_quote(self, mock_get):
-        """Testa se a view AJAX repassa a chamada para a API"""
+        """testa se a view AJAX repassa a chamada para a API"""
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = {'ticker': 'PETR4', 
                                                    'price': 38.00}

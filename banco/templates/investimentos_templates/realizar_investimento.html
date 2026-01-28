@@ -11,12 +11,9 @@
         <p style="color: var(--text-light);">Selecione o ativo e simule sua aplicação.</p>
     </div>
 
-    <!-- Layout de Grid (Form Esquerda / Resumo Direita) -->
     <div class="grid-layout">
         
-        <!-- COLUNA DA ESQUERDA: Formulário -->
         <div>
-            <!-- Card de Poder de Compra -->
             <div class="balance-card">
                 <div>
                     <span style="font-size: 0.75rem; color: #64748b; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Disponível para Investir</span>
@@ -36,13 +33,12 @@
                     <div class="alert alert-error">{{ form.non_field_errors.as_text }}</div>
                 {% endif %}
 
-                <!-- Tipo de Investimento -->
                 <div class="form-group">
                     <label class="form-label">Categoria</label>
-                    {{ form.tipo_investimento }} <!-- Widget Select padrão do Django com class='form-input' -->
+                    {{ form.tipo_investimento }}
                 </div>
 
-                <!-- SEÇÃO RENDA VARIÁVEL (Ativa via JS) -->
+                
                 <div id="variable-section">
                     <div class="form-group">
                         <label class="form-label">Buscar Ativo</label>
@@ -59,7 +55,6 @@
                             </button>
                         </div>
                         
-                        <!-- Dropdown de Resultados -->
                         <div id="search-results" class="search-results-dropdown"></div>
                         
                         {% if form.ticker.errors %}
@@ -69,14 +64,13 @@
 
                     <div class="form-group">
                         <label class="form-label">Quantidade</label>
-                        {{ form.quantidade }} <!-- Widget Number -->
+                        {{ form.quantidade }}
                         {% if form.quantidade.errors %}
                             <div class="form-error-msg" style="display:block">{{ form.quantidade.errors.0 }}</div>
                         {% endif %}
                     </div>
                 </div>
 
-                <!-- SEÇÃO RENDA FIXA (Ativa via JS) -->
                 <div id="fixed-section" style="display: none;">
                     <div class="form-group">
                         <label class="form-label">Valor do Aporte (R$)</label>
@@ -94,18 +88,15 @@
             </form>
         </div>
 
-        <!-- COLUNA DA DIREITA: Resumo da Ordem (Sticky) -->
         <div>
             <div class="order-summary">
                 <h3 class="summary-header">Resumo da Ordem</h3>
                 
-                <!-- Estado Vazio -->
                 <div id="summary-placeholder" style="text-align: center; color: var(--text-light); padding: 2rem 0;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3; margin-bottom: 1rem;"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
                     <p style="font-size: 0.9rem;">Busque um ativo para visualizar a cotação.</p>
                 </div>
 
-                <!-- Conteúdo Preenchido -->
                 <div id="summary-content" style="display: none;">
                     <div class="summary-row">
                         <span class="summary-label">Ativo</span>
@@ -136,10 +127,9 @@
     </div>
 </div>
 
-<!-- Lógica JS (Mantida a sua, apenas ajustada para os novos IDs/Classes se necessário) -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const typeSelect = document.getElementById('tipo_investimento'); // Django ID padrao é id_nomecampo
+        const typeSelect = document.getElementById('tipo_investimento');
         const varSection = document.getElementById('variable-section');
         const fixSection = document.getElementById('fixed-section');
         
@@ -158,12 +148,9 @@
         const msgError = document.getElementById('error-balance');
 
         let currentPrice = 0;
-        // Parse float seguro do Django template
         const userBalance = parseFloat("{{ conta.saldo|stringformat:'f' }}");
 
-        // 1. Toggle Tipo
         function toggleType() {
-            // Nota: Verifique se o value é 'RENDA_FIXA' ou o ID numérico, dependendo do seu choice field
             if (typeSelect.value === 'RENDA_FIXA') {
                 fixSection.style.display = 'block';
                 varSection.style.display = 'none';
@@ -178,7 +165,6 @@
             toggleType();
         }
 
-        // --- 2. Busca (Autocomplete) ---
         inputSearch.addEventListener('input', async function(e) {
             const query = e.target.value;
             listResults.innerHTML = '';
@@ -189,9 +175,6 @@
             }
 
             try {
-                // Simulação ou chamada real
-                // Substitua pela sua URL real: `/ajax/market/?action=search&q=${query}`
-                // Aqui estou usando um mock para demonstração visual
                 const response = await fetch(`/ajax/market/?action=search&q=${query}`);
                 
                 if (response.ok) {
@@ -216,13 +199,9 @@
                 console.log("Erro autocomplete");
             }
         });
-
-        // Fechar dropdown ao clicar fora
         document.addEventListener('click', function(e) {
             if (e.target !== inputSearch) listResults.style.display = 'none';
         });
-
-        // --- 3. Cotação ---
         btnSearch.addEventListener('click', async function() {
             const ticker = inputSearch.value.toUpperCase();
             if(!ticker) return;
@@ -269,7 +248,6 @@
             }
         });
 
-        // 4. Cálculo Total
         if(inputQtd) {
             inputQtd.addEventListener('input', function() {
                 const qtd = parseFloat(this.value || 0);

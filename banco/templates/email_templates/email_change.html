@@ -14,7 +14,7 @@
     <form method="post" action="{% url 'email_change_page' %}" id="emailChangeForm" novalidate>
         {% csrf_token %}
 
-        <!-- Exibição de erros do Django -->
+        <!-- erros Django -->
         {% if form.non_field_errors %}
             <div class="alert alert-error">
                 {{ form.non_field_errors.as_text }}
@@ -59,7 +59,6 @@
             }
         });
 
-        // Limpar erro ao digitar
         emailInput.addEventListener('input', function() {
             emailInput.style.borderColor = 'var(--border-color)';
             errorMsg.style.display = 'none';
