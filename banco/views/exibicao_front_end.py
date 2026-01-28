@@ -115,6 +115,7 @@ class DashboardInvestimentosFrontEnd(TemplateView):
 
         saldo_conta = 0.0
         total_investido = 0.0
+        total_renda_fixa = 0.0
         patrimonio_total = 0.0
         meu_perfil = None
 
@@ -146,13 +147,21 @@ class DashboardInvestimentosFrontEnd(TemplateView):
                     url_inv = f"{base}cliente/{cliente_id}/"
                     try:
                         resp_inv = requests.get(url_inv, headers=headers)
+
                         if resp_inv.status_code == 200:
                             investimentos = resp_inv.json()
-                            total_investido = sum(float(i['valor_investido']) 
-                                                  for i in investimentos if 
-                                                  i.get('ativo', True) and 
-                                                  i.get('tipo_investimento', 
-                                                        'RENDA_FIXA'))
+                            print(investimentos)
+
+                            for i in investimentos:
+                                if i.get('tipo_investimento') == 'RENDA_FIXA':
+                                    if i.get('ativo') is True:
+                                        valor = float(i.get('valor_investido', 
+                                                            0))
+                                        total_investido += valor
+                                        total_renda_fixa += valor
+                                elif i.get('ativo') is True:
+                                    valor = float(i.get('valor_investido', 0))
+                                    total_investido += valor
                     except Exception:
                         total_investido = 0.0
 
@@ -167,8 +176,8 @@ class DashboardInvestimentosFrontEnd(TemplateView):
                     else:
                         taxa = 0.18
                     
-                    context['renda_fixa'] = total_investido
-                    context['projecao'] = total_investido * (1 + taxa)
+                    context['renda_fixa'] = total_renda_fixa
+                    context['projecao'] = total_renda_fixa * (1 + taxa)
 
         except Exception as e:
             print(f"Erro no dashboard: {e}")
